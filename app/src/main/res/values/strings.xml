@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AppleCare</string>
+    <string name="onboarding_text_1">Worried your plants are unhealthy?</string>
+    <string name="onboarding_text_2">Just take a picture.</string>
+    <string name="onboarding_text_3">We will scan the picture and give you diagnosis.</string>
+    <string name="next">Next</string>
+    <string name="skip">Skip</string>
 </resources>
