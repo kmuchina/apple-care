@@ -6,4 +6,8 @@
     <string name="onboarding_text_3">We will scan the picture and give you diagnosis.</string>
     <string name="next">Next</string>
     <string name="skip">Skip</string>
+    <string name="onboard">Onboard</string>
+    <string name="login">Login</string>
+    <string name="signup">Sign Up</string>
+    <string name="home">Home</string>
 </resources>

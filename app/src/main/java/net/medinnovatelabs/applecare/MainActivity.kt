@@ -3,26 +3,21 @@ package net.medinnovatelabs.applecare
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import net.medinnovatelabs.applecare.ui.OnBoardingScreen
+import androidx.navigation.compose.rememberNavController
+import net.medinnovatelabs.applecare.ui.Destinations
+import net.medinnovatelabs.applecare.ui.NavigationGraph
 import net.medinnovatelabs.applecare.ui.theme.AppleCareTheme
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppleCareTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    OnBoardingScreen(onSkip = { })
-                }
-            }
-        }
-    }
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		setContent {
+			AppleCareTheme {
+				NavigationGraph(
+					navController = rememberNavController(),
+					startDestination = Destinations.OnBoard.name
+				)
+			}
+		}
+	}
 }

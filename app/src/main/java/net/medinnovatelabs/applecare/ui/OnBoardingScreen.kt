@@ -83,7 +83,10 @@ fun OnBoardingScreen(
 			horizontalAlignment = Alignment.CenterHorizontally,
 		) {
 			Button(
-				onClick = { result.intValue++ },
+				onClick = {
+					if(result.value < 3) result.value++
+					else onSkip()
+				},
 				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 				modifier = Modifier
 					.width(184.dp)
@@ -138,7 +141,7 @@ fun OnBoardingScreen(
 
 			Spacer(modifier = Modifier.width(8.dp))
 
-			if(result.value == 3){
+			if(result.value > 2){
 				Canvas(modifier = Modifier.size(8.dp), onDraw = {
 					drawCircle(color = Color(0xFF5DB075))
 				})
