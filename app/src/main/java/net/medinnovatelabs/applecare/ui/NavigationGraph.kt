@@ -7,14 +7,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import net.medinnovatelabs.applecare.R
-import net.medinnovatelabs.applecare.ui.Home.Home
 import net.medinnovatelabs.applecare.ui.LogIn.LogIn
+import net.medinnovatelabs.applecare.ui.Main.Main
 
 enum class Destinations(@StringRes val route: Int) {
 	OnBoard(route = R.string.onboard),
 	LogIn(route = R.string.login),
 	SignUp(route = R.string.signup),
-	Home(route = R.string.home)
+	Main(route = R.string.main)
 }
 
 @Composable
@@ -38,12 +38,12 @@ fun NavigationGraph(
 
 		composable(route = Destinations.LogIn.name) {
 			LogIn(onLogin = {
-				navController.navigate(Destinations.Home.name)
+				navController.navigate(Destinations.Main.name)
 			})
 		}
 
-		composable(route = Destinations.Home.name) {
-			Home()
+		composable(route = Destinations.Main.name) {
+			Main()
 		}
 	}
 }

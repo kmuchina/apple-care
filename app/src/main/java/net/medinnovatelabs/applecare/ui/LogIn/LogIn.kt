@@ -405,7 +405,7 @@ fun GoogleLogIn() {
 			.height(44.dp)
 	) {
 		Icon(
-			painter = painterResource(id = R.drawable.google),
+			painter = painterResource(id = R.drawable.google_icon),
 			contentDescription = "Google Icon",
 			modifier = Modifier.size(15.dp)
 		)
