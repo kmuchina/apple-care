@@ -1,8 +1,10 @@
 package net.medinnovatelabs.applecare.ui
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,19 +84,71 @@ fun OnBoardingScreen(
 		) {
 			Button(
 				onClick = { result.intValue++ },
+				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 				modifier = Modifier
 					.width(184.dp)
 					.height(36.dp)
 			) {
-				Text(text = stringResource(R.string.next))
+				if (result.value > 2) {
+					Text(
+						text = "Get Started"
+					)
+				} else {
+					Text(
+						text = stringResource(R.string.next)
+					)
+				}
 			}
 
 			Spacer(modifier = Modifier.height(8.dp))
 
 			TextButton(onClick = onSkip) {
-				Text(text = stringResource(R.string.skip))
+				Text(
+					text = stringResource(R.string.skip),
+					color = Color(0xFF000000)
+				)
+
 			}
 		}
+
+		Spacer(modifier.height(48.dp))
+
+		Row {
+			if(result.value == 1){
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0xFF5DB075))
+				})
+			} else {
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0x405DB075))
+				})
+			}
+
+			Spacer(modifier = Modifier.width(8.dp))
+
+			if(result.value == 2){
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0xFF5DB075))
+				})
+			} else {
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0x405DB075))
+				})
+			}
+
+			Spacer(modifier = Modifier.width(8.dp))
+
+			if(result.value == 3){
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0xFF5DB075))
+				})
+			} else {
+				Canvas(modifier = Modifier.size(8.dp), onDraw = {
+					drawCircle(color = Color(0x405DB075))
+				})
+			}
+		}
+
 
 	}
 }
