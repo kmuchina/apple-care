@@ -17,13 +17,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Lock
@@ -35,7 +35,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -49,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -89,10 +87,6 @@ fun LogIn(){
         MyScreen()
         Spacer(modifier = Modifier.height(48.dp))
         LogButton()
-        Spacer(modifier = Modifier.height(27.dp))
-        GoogleLogIn()
-        Spacer(modifier = Modifier.height(27.dp))
-        SignUpPrompt()
 
     }
 }
@@ -206,7 +200,7 @@ fun RememberMeCheckbox(
         Spacer(modifier = Modifier.width(118.dp)) // Spacer for alignment
         val forgotPasswordStyle = TextStyle(
             textDecoration = TextDecoration.Underline,
-            color = Color(0xFF5DB075)
+            color = Color.Blue
         )
         Text(
             text = "Forgot password?", // Use string resource
@@ -383,57 +377,10 @@ fun LogButton(){
 @Preview
 @Composable
 fun GoogleLogIn(){
-    Column (
-        modifier = Modifier.padding(horizontal = 24.dp)
-    ){
-        OutlinedButton(onClick = { /****do this****/ },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.Unspecified),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .background(color = Color.Transparent, shape = CutCornerShape(15.dp))
-        ) {
+    OutlinedButton(onClick = { /****do this****/ }) {
 
-            Icon(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(" Login with Google")
-        }
-    }
-
-}
-
-@Preview
-@Composable
-fun SignUpPrompt() {
-    val signUpText = "Don't have an account? Sign Up"
-    val signUpStart = signUpText.indexOf("Sign Up")
-    val signUpEnd = signUpStart + "Sign Up".length
-
-    Row(
-        modifier = Modifier
-            .clickable {
-                /* Navigate to sign up page */
-            }
-            .fillMaxWidth()
-            .padding(horizontal = 80.dp)
-            .height(20.dp)
-    ) {
-        Text(
-            text = signUpText.substring(0, signUpStart),
-            color = Color.Black,
-            modifier = Modifier.padding(end = 4.dp)
-        )
-        Text(
-            text = signUpText.substring(signUpStart, signUpEnd),
-            color = Color(0xFF5DB075),
-            modifier = Modifier.clickable {
-                /* Navigate to sign up page */
-            }
-        )
-        Text(
-            text = signUpText.substring(signUpEnd),
-            color = Color.Black,
-            modifier = Modifier.padding(start = 4.dp)
-        )
+        Icon(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(" Login with Google")
     }
 }

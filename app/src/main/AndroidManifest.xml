@@ -13,9 +13,6 @@
         android:theme="@style/Theme.AppleCare"
         tools:targetApi="31">
         <activity
-            android:name=".RegisterPage"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
