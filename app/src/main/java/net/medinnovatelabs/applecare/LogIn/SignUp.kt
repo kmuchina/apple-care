@@ -1,5 +1,6 @@
 package net.medinnovatelabs.applecare.LogIn
 
+//import androidx.compose.material.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,23 +16,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-//import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,10 +43,8 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +53,7 @@ import net.medinnovatelabs.applecare.R
 @Preview
 @Composable
 fun SignUp(){
-    Column  {
+    Column {
         Text(
             text = "Create your account",
             style = TextStyle(
@@ -80,13 +74,12 @@ fun SignUp(){
         Spacer(modifier = Modifier.height(27.dp))
         PreviewPassword1TextField()
 //        Spacer(modifier = Modifier.height(5.dp))
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         RegisterButton()
         Spacer(modifier = Modifier.height(36.dp))
         Google1LogIn()
         Spacer(modifier = Modifier.height(27.dp))
         SignInPrompt()
-
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -140,7 +133,7 @@ fun Email1InputBox(email: String, onEmailChange: (String) -> Unit) {
         label = { Text("Email Address", color = Color.Black) },
         textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
         shape = RoundedCornerShape(8.dp),
-        leadingIcon = { Icon(imageVector = Icons.Outlined.AccountBox, contentDescription = "Email Icon", tint = Color(
+        leadingIcon = { Icon(imageVector = Icons.Outlined.Email, contentDescription = "Email Icon", tint = Color(
             0xFF5DB075
         )
         )
@@ -290,14 +283,14 @@ fun RegisterButton(){
         Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(40.dp)
+                .height(44.dp)
                 .background(color = Color(0xFF5DB075), shape = RoundedCornerShape(size = 5.dp)),
 //            elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 10.dp, focusedElevation = 0.dp, hoveredElevation = 4.dp, disabledElevation = 0.dp)
         ) {
             Text(text = "Register", color = Color.White, fontSize = 20.sp)
 
         }
-        Spacer(modifier = Modifier.height(7.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         Row {
             Box(
                 modifier = Modifier
@@ -318,7 +311,6 @@ fun RegisterButton(){
                 ), modifier = Modifier
                     .width(16.dp)
                     .height(18.dp)
-                    .padding(top = 2.dp)
             )
             Spacer(modifier = Modifier.width(15.7.dp))
             Box(
@@ -352,7 +344,7 @@ fun Google1LogIn(){
 
             Icon(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text(" Login with Google")
+            Text("Register with Google")
         }
     }
 
@@ -361,35 +353,24 @@ fun Google1LogIn(){
 @Preview
 @Composable
 fun SignInPrompt() {
-    val signUpText = "Don't have an account? Sign In"
-    val signUpStart = signUpText.indexOf("Sign In")
-    val signUpEnd = signUpStart + "Sign In".length
-
     Row(
+        horizontalArrangement = Arrangement.Center,
         modifier = Modifier
-            .clickable {
-                /* Navigate to sign up page */
-            }
             .fillMaxWidth()
-            .padding(horizontal = 80.dp)
+            .padding(horizontal = 20.dp)
             .height(20.dp)
     ) {
         Text(
-            text = signUpText.substring(0, signUpStart),
+            text = "Already have an account? ",
             color = Color.Black,
             modifier = Modifier.padding(end = 4.dp)
         )
         Text(
-            text = signUpText.substring(signUpStart, signUpEnd),
+            text = "Sign In",
             color = Color(0xFF5DB075),
             modifier = Modifier.clickable {
                 /* Navigate to sign up page */
             }
-        )
-        Text(
-            text = signUpText.substring(signUpEnd),
-            color = Color.Black,
-            modifier = Modifier.padding(start = 4.dp)
         )
     }
 }
