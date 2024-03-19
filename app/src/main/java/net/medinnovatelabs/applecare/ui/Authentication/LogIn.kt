@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui.LogIn
+package net.medinnovatelabs.applecare.ui.Authentication
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -57,6 +58,7 @@ import net.medinnovatelabs.applecare.R
 @Composable
 fun LogIn(
 	onLogin: () -> Unit,
+	onSignUp: () -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	Column(
@@ -71,7 +73,7 @@ fun LogIn(
 				color = Color(0xFF000000),
 				textAlign = TextAlign.Center,
 			), modifier = Modifier
-				.padding(top = 80.dp, bottom = 40.dp)
+				.padding(top = 60.dp, bottom = 40.dp)
 				.padding(horizontal = 92.dp)
 		)
 
@@ -83,13 +85,13 @@ fun LogIn(
 
 		MyScreen()
 
-		Spacer(modifier = Modifier.height(48.dp))
+		Spacer(modifier = Modifier.height(42.dp))
 
 		LogButton(onLogin = onLogin)
 
-		Spacer(modifier = Modifier.height(44.dp))
+		Spacer(modifier = Modifier.height(42.dp))
 
-		GoogleLogIn()
+		GoogleLogIn(onSignUp = onSignUp)
 
 	}
 }
@@ -352,7 +354,7 @@ fun LogButton(onLogin: () -> Unit) {
 			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 			modifier = Modifier
 				.fillMaxWidth()
-				.height(44.dp)
+				.height(42.dp)
 				.background(color = Color(0xFF5DB075), shape = RoundedCornerShape(size = 5.dp)),
 //            elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 10.dp, focusedElevation = 0.dp, hoveredElevation = 4.dp, disabledElevation = 0.dp)
 		) {
@@ -380,7 +382,6 @@ fun LogButton(onLogin: () -> Unit) {
 				), modifier = Modifier
 					.width(16.dp)
 					.height(18.dp)
-					.padding(top = 2.dp)
 			)
 			Spacer(modifier = Modifier.width(15.7.dp))
 			Box(
@@ -395,14 +396,20 @@ fun LogButton(onLogin: () -> Unit) {
 }
 
 
-@Preview
 @Composable
-fun GoogleLogIn() {
+fun GoogleLogIn(
+	onSignUp: () -> Unit
+) {
 	OutlinedButton(
 		onClick = { /****do this****/ },
+		colors = ButtonDefaults.buttonColors(
+			containerColor = Color.Transparent,
+			contentColor = Color.Unspecified
+		),
 		modifier = Modifier
 			.width(320.dp)
 			.height(44.dp)
+			.background(color = Color.Transparent, shape = CutCornerShape(15.dp))
 	) {
 		Icon(
 			painter = painterResource(id = R.drawable.google),
@@ -423,7 +430,7 @@ fun GoogleLogIn() {
 			"Don't have an account?",
 			fontSize = 14.sp
 		)
-		TextButton(onClick = { /*TODO*/ }) {
+		TextButton(onClick = { onSignUp() }) {
 			Text(
 				text = "Signup",
 				fontSize = 14.sp,

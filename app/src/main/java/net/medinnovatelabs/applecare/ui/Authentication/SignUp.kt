@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.LogIn
+package net.medinnovatelabs.applecare.ui.Authentication
 
 //import androidx.compose.material.Text
 import androidx.compose.foundation.background
@@ -50,9 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.medinnovatelabs.applecare.R
 
-@Preview
 @Composable
-fun SignUp(){
+fun SignUp(
+    onSignIn: () -> Unit
+){
     Column {
         Text(
             text = "Create your account",
@@ -63,9 +64,8 @@ fun SignUp(){
                 fontWeight = FontWeight(600),
                 color = Color(0xFF000000),
                 textAlign = TextAlign.Center,
-            ), modifier = Modifier
-                .padding(top = 80.dp, start = 110.dp)
-//                .padding(horizontal = 84.dp)
+            ),
+            modifier = Modifier.padding(top = 60.dp, start = 110.dp)
         )
         Spacer(modifier = Modifier.height(13.dp))
         NameInputScreen()
@@ -73,15 +73,15 @@ fun SignUp(){
         Email1InputScreen()
         Spacer(modifier = Modifier.height(27.dp))
         PreviewPassword1TextField()
-//        Spacer(modifier = Modifier.height(5.dp))
         Spacer(modifier = Modifier.height(30.dp))
         RegisterButton()
         Spacer(modifier = Modifier.height(36.dp))
         Google1LogIn()
         Spacer(modifier = Modifier.height(27.dp))
-        SignInPrompt()
+        SignInPrompt(onSignIn = onSignIn)
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NameInputBox(name: String, onNameChange: (String) -> Unit) {
@@ -91,21 +91,19 @@ fun NameInputBox(name: String, onNameChange: (String) -> Unit) {
         label = { Text("Full name", color = Color.Black) },
         textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
         shape = RoundedCornerShape(8.dp),
-        leadingIcon = { Icon(imageVector = Icons.Outlined.Person, contentDescription = "Person Icon", tint = Color(
-            0xFF5DB075
-        )
-        )
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Outlined.Person,
+                contentDescription = "Person Icon",
+                tint = Color( 0xFF5DB075)
+            )
         },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Black,
             unfocusedBorderColor = Color.Black
-        ), modifier = Modifier.fillMaxWidth(0.9f)
-//        modifier = Modifier
-//            .width(200.dp)
-//            .height(50.dp)
-//            .border(width = 1.dp, color = Color.Black)
-////            .padding(8.dp)
+        ),
+        modifier = Modifier.fillMaxWidth(0.9f)
     )
 }
 
@@ -114,9 +112,7 @@ fun NameInputScreen() {
     var name by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-//            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -133,21 +129,19 @@ fun Email1InputBox(email: String, onEmailChange: (String) -> Unit) {
         label = { Text("Email Address", color = Color.Black) },
         textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
         shape = RoundedCornerShape(8.dp),
-        leadingIcon = { Icon(imageVector = Icons.Outlined.Email, contentDescription = "Email Icon", tint = Color(
-            0xFF5DB075
-        )
-        )
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Outlined.Email,
+                contentDescription = "Email Icon",
+                tint = Color( 0xFF5DB075 )
+            )
         },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Black,
             unfocusedBorderColor = Color.Black
-        ), modifier = Modifier.fillMaxWidth(0.9f)
-//        modifier = Modifier
-//            .width(200.dp)
-//            .height(50.dp)
-//            .border(width = 1.dp, color = Color.Black)
-////            .padding(8.dp)
+        ), 
+        modifier = Modifier.fillMaxWidth(0.9f)
     )
 }
 
@@ -156,9 +150,7 @@ fun Email1InputScreen() {
     var email by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-//            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -251,7 +243,6 @@ fun PreviewPassword1TextField() {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
-        // .padding(16.dp), // Uncomment if you need padding
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -350,15 +341,16 @@ fun Google1LogIn(){
 
 }
 
-@Preview
 @Composable
-fun SignInPrompt() {
+fun SignInPrompt(
+    onSignIn: () -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .height(20.dp)
+            .height(24.dp)
     ) {
         Text(
             text = "Already have an account? ",
@@ -369,7 +361,7 @@ fun SignInPrompt() {
             text = "Sign In",
             color = Color(0xFF5DB075),
             modifier = Modifier.clickable {
-                /* Navigate to sign up page */
+                onSignIn()
             }
         )
     }
