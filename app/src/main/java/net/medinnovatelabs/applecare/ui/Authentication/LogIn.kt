@@ -118,12 +118,9 @@ fun EmailInputBox(email: String, onEmailChange: (String) -> Unit) {
 		colors = TextFieldDefaults.outlinedTextFieldColors(
 			focusedBorderColor = Color.Black,
 			unfocusedBorderColor = Color.Black
-		), modifier = Modifier.fillMaxWidth(0.9f)
-//        modifier = Modifier
-//            .width(200.dp)
-//            .height(50.dp)
-//            .border(width = 1.dp, color = Color.Black)
-////            .padding(8.dp)
+		),
+		modifier = Modifier.fillMaxWidth(0.9f)
+
 	)
 }
 
@@ -134,7 +131,6 @@ fun EmailInputScreen() {
 	Column(
 		modifier = Modifier
 			.fillMaxWidth(),
-//            .padding(16.dp),
 		verticalArrangement = Arrangement.Center,
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {
@@ -354,12 +350,17 @@ fun LogButton(onLogin: () -> Unit) {
 			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 			modifier = Modifier
 				.fillMaxWidth()
-				.height(42.dp)
-				.background(color = Color(0xFF5DB075), shape = RoundedCornerShape(size = 5.dp)),
-//            elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 10.dp, focusedElevation = 0.dp, hoveredElevation = 4.dp, disabledElevation = 0.dp)
+				.height(44.dp)
+				.background(
+					color = Color(0xFF5DB075),
+					shape = RoundedCornerShape(size = 5.dp)
+				),
 		) {
-			Text(text = "Login", color = Color.White, fontSize = 20.sp)
-
+			Text(
+				text = "Login",
+				color = Color.White,
+				fontSize = 20.sp
+			)
 		}
 		Spacer(modifier = Modifier.height(38.dp))
 		Row {
@@ -408,13 +409,13 @@ fun GoogleLogIn(
 		),
 		modifier = Modifier
 			.width(320.dp)
-			.height(44.dp)
+			.height(40.dp)
 			.background(color = Color.Transparent, shape = CutCornerShape(15.dp))
 	) {
 		Icon(
 			painter = painterResource(id = R.drawable.google_icon),
 			contentDescription = "Google Icon",
-			modifier = Modifier.size(15.dp)
+			modifier = Modifier.size(28.dp)
 		)
 		Spacer(modifier = Modifier.width(8.dp))
 		Text("Login with Google")

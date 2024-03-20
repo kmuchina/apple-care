@@ -65,12 +65,13 @@ fun OnBoardingScreen(
 			Image(
 				painter = painterResource(imageResource),
 				contentDescription = null,
-				modifier = Modifier.size(250.dp)
+				modifier = Modifier
+					.size(300.dp)
 			)
-
 			Text(
 				text = textResource,
 				fontSize = 16.sp,
+				minLines = 2,
 				fontWeight = FontWeight.Bold,
 				textAlign = TextAlign.Center
 			)

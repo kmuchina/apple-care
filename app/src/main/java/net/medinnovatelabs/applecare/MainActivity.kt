@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 			AppleCareTheme {
 				NavigationGraph(
 					navController = rememberNavController(),
-					startDestination = Destinations.OnBoard.name
+					startDestination = Destinations.Auth.name
 				)
 			}
 		}

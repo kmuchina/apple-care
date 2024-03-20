@@ -45,13 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.medinnovatelabs.applecare.R
 
 @Composable
 fun SignUp(
+    onSignUp: () -> Unit,
     onSignIn: () -> Unit
 ){
     Column {
@@ -74,7 +74,7 @@ fun SignUp(
         Spacer(modifier = Modifier.height(27.dp))
         PreviewPassword1TextField()
         Spacer(modifier = Modifier.height(30.dp))
-        RegisterButton()
+        RegisterButton( onSignUp = onSignUp )
         Spacer(modifier = Modifier.height(36.dp))
         Google1LogIn()
         Spacer(modifier = Modifier.height(27.dp))
@@ -265,13 +265,19 @@ fun PreviewPassword1TextField() {
 
 
 
-@Preview
+
 @Composable
-fun RegisterButton(){
+fun RegisterButton(
+    onSignUp: () -> Unit
+){
     Column (
         modifier = Modifier.padding(horizontal = 24.dp)
     ){
-        Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
+        Button(
+            onClick = { onSignUp() },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF5DB075)
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(44.dp)
@@ -316,25 +322,31 @@ fun RegisterButton(){
 
 }
 
-@Preview
+
 @Composable
 fun Google1LogIn(){
-    /****do this****/
     Column (
         modifier = Modifier.padding(horizontal = 40.dp)
     ){
-        /****do this****/
-        /****do this****/
         OutlinedButton(onClick = { /****do this****/ },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.Unspecified),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Unspecified
+            ),
             modifier = Modifier
-                .fillMaxWidth()
+                .width(320.dp)
                 .height(40.dp)
-                .background(color = Color.Transparent, shape = CutCornerShape(15.dp))
+                .background(
+                    color = Color.Transparent,
+                    shape = CutCornerShape(15.dp)
+                )
         ) {
-
-            Icon(painter = painterResource(id = R.drawable.google_icon), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
-            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.google_icon),
+                contentDescription = "Google Icon",
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text("Register with Google")
         }
     }

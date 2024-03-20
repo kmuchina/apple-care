@@ -6,15 +6,16 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import net.medinnovatelabs.applecare.R
+import net.medinnovatelabs.applecare.ui.Authentication.LastStep
 import net.medinnovatelabs.applecare.ui.Authentication.LogIn
+import net.medinnovatelabs.applecare.ui.Authentication.MoreInfo
 import net.medinnovatelabs.applecare.ui.Authentication.SignUp
 import net.medinnovatelabs.applecare.ui.Main.Main
 
 enum class Destinations(@StringRes val route: Int) {
-	OnBoard(route = R.string.onboard),
-	LogIn(route = R.string.login),
-	SignUp(route = R.string.signup),
+	Auth(route = R.string.onboard),
 	Main(route = R.string.main)
 }
 
@@ -30,30 +31,45 @@ fun NavigationGraph(
 		modifier = modifier
 	) {
 
-		composable(route = Destinations.OnBoard.name) {
-			OnBoardingScreen(onSkip = {
-				navController.navigate(Destinations.LogIn.name)
-			})
-		}
+		navigation(route = Destinations.Auth.name, startDestination = "onboard") {
+			composable(route = "onboard") {
+				OnBoardingScreen(onSkip = {
+					navController.navigate("Login")
+				})
+			}
 
+			composable(route = "Login") {
+				LogIn(
+					onLogin = {
+						navController.navigate(Destinations.Main.name)
+					},
+					onSignUp = {
+						navController.navigate("Signup")
+					}
+				)
+			}
 
-		composable(route = Destinations.LogIn.name) {
-			LogIn(
-				onLogin = {
-					navController.navigate(Destinations.Main.name)
-				},
-				onSignUp = {
-					navController.navigate(Destinations.SignUp.name)
-				}
-			)
-		}
+			composable(route = "Signup") {
+				SignUp(
+					onSignUp = { navController.navigate("MoreInfo") },
+					onSignIn = { navController.navigate("Login") }
+				)
+			}
 
-		composable(route = Destinations.SignUp.name) {
-			SignUp(
-				onSignIn = {
-					navController.navigate(Destinations.LogIn.name)
-				}
-			)
+			composable(route = "MoreInfo") {
+				MoreInfo(
+					onCompleteReg = { navController.navigate("AllSet") },
+					onBack = { navController.popBackStack() }
+				)
+			}
+
+			composable(route = "AllSet") {
+				LastStep(nav = {
+					navController.navigate(Destinations.Main.name ) {
+						popUpTo(Destinations.Auth.name) { inclusive = true }
+					}
+				})
+			}
 		}
 
 		composable(route = Destinations.Main.name) {
