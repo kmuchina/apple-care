@@ -45,6 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.medinnovatelabs.applecare.R
+import net.medinnovatelabs.applecare.data.constituenciesByCounty
+import net.medinnovatelabs.applecare.data.counties
 
 @Composable
 fun MoreInfo(
@@ -209,66 +211,6 @@ fun LocationDetails() {
 	var selectedConstituency by remember { mutableStateOf("") }
 	var selectedWard by remember { mutableStateOf("") }
 
-	// counties
-	val counties = listOf(
-		"Baringo",
-		"Bomet",
-		"Bungoma",
-		"Busia",
-		"Elgeyo Marakwet",
-		"Embu",
-		"Garissa",
-		"Homa Bay",
-		"Isiolo",
-		"Kajiado",
-		"Kakamega",
-		"Kericho",
-		"Kiambu",
-		"Kilifi",
-		"Kirinyaga",
-		"Kisii",
-		"Kisumu",
-		"Kitui",
-		"Kwale",
-		"Laikipia",
-		"Lamu",
-		"Machakos",
-		"Makueni",
-		"Mandera",
-		"Marsabit",
-		"Meru",
-		"Migori",
-		"Mombasa",
-		"Murang'a",
-		"Nairobi",
-		"Nakuru",
-		"Nandi",
-		"Narok",
-		"Nyamira",
-		"Nyandarua",
-		"Nyeri",
-		"Samburu",
-		"Siaya",
-		"Taita Taveta",
-		"Tana River",
-		"Tharaka Nithi",
-		"Trans Nzoia",
-		"Turkana",
-		"Uasin Gishu",
-		"Vihiga",
-		"Wajir",
-		"West Pokot"
-	)
-	val constituenciesByCounty = mapOf(
-		"Nairobi" to listOf("Langata", "Kibra", "Dagoretti North" /* ... */),
-		"Mombasa" to listOf("Nyali", "Changamwe", "Jomvu" /* ... */),
-		/* ... */
-	)
-	val wardsByConstituency = mapOf(
-		"Langata" to listOf("Karen", "South C", "Mugumoini" /* ... */),
-		"Kibra" to listOf("Laini Saba", "Lindi", "Sarangombe" /* ... */),
-		/* ... */
-	)
 
 	Text(
 		text = "Where is your farm",
@@ -377,6 +319,7 @@ fun LocationDetails() {
 
 			Spacer(modifier = Modifier.height(30.dp))
 
+			/*
 			// Ward dropdown (populate based on selected constituency)
 			ExposedDropdownMenuBox(
 				expanded = wardExpanded,
@@ -416,6 +359,8 @@ fun LocationDetails() {
 					}
 				}
 			}
+
+			 */
 		}
 	}
 }
