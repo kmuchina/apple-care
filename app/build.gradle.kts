@@ -54,6 +54,14 @@ dependencies {
 	implementation(libs.androidx.navigation.fragment.ktx)
 	implementation(libs.androidx.navigation.ui.ktx)
 	implementation(libs.navigation.compose)
+	//Camera
+	implementation("androidx.camera:camera-camera2:1.3.1")
+	implementation("androidx.camera:camera-core:1.3.1")
+	implementation("androidx.camera:camera-lifecycle:1.3.1")
+	implementation("androidx.camera:camera-view:1.3.1")
+	implementation("androidx.camera:camera-extensions:1.3.1")
+	implementation("io.github.microutils:kotlin-logging:2.0.6")
+
 
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -67,6 +75,9 @@ dependencies {
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))
+	implementation ("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
+	implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+	implementation ("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
 	androidTestImplementation(libs.androidx.ui.test.junit4)
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
