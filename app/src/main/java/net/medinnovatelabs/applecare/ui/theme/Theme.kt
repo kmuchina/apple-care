@@ -86,7 +86,7 @@ private val DarkColors = darkColorScheme(
 fun AppleCareTheme(
 	darkTheme: Boolean = isSystemInDarkTheme(),
 	// Dynamic color is available on Android 12+
-	dynamicColor: Boolean = true,
+	dynamicColor: Boolean = false,
 	content: @Composable () -> Unit
 ) {
 	val colorScheme = when {
@@ -98,11 +98,13 @@ fun AppleCareTheme(
 		darkTheme -> DarkColors
 		else -> LightColors
 	}
+	
 	val view = LocalView.current
 	if (!view.isInEditMode) {
 		SideEffect {
 			val window = (view.context as Activity).window
 			window.statusBarColor = colorScheme.primary.toArgb()
+			window.navigationBarColor = colorScheme.secondary.toArgb()
 			WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
 		}
 	}

@@ -333,7 +333,7 @@ fun Google1LogIn(){
                 .background(color = Color.Transparent, shape = CutCornerShape(15.dp))
         ) {
 
-            Icon(painter = painterResource(id = R.drawable.google), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
+            Icon(painter = painterResource(id = R.drawable.google_icon), contentDescription = "Google Icon", modifier = Modifier.size(30.dp))
             Spacer(modifier = Modifier.width(4.dp))
             Text("Register with Google")
         }

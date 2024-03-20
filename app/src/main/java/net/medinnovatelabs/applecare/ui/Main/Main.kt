@@ -1,7 +1,9 @@
 package net.medinnovatelabs.applecare.ui.Main
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,7 +24,6 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
@@ -37,9 +38,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -76,8 +79,14 @@ fun Main(
 
 	ModalNavigationDrawer(
 		drawerContent = {
-			ModalDrawerSheet {
-				Row() {
+			ModalDrawerSheet() {
+				Row(
+					horizontalArrangement = Arrangement.SpaceBetween,
+					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(start = 10.dp, end = 40.dp)
+				) {
 					IconButton(
 						onClick = {
 							scope.launch {
@@ -91,11 +100,11 @@ fun Main(
 							contentDescription = null
 						)
 					}
-					Text(
-						"Leaflens",
-						modifier = Modifier.padding(16.dp),
-						style = MaterialTheme.typography.titleMedium
+					Icon(
+						painter = painterResource(id = R.drawable.logo),
+						contentDescription = "Leaflens Logo",
 					)
+					Text("")
 				}
 				Divider()
 
@@ -107,7 +116,11 @@ fun Main(
 			topBar = {
 				when (currentScreen.name) {
 					"Home" -> {
-						TopAppBar(title = { Text("Home") })
+						HomeTopAppBar(onMenuClicked = {
+							scope.launch {
+								drawerState.open()
+							}
+						})
 					}
 
 					"History" -> {
@@ -294,4 +307,10 @@ fun BottomNavigationBar(
 			modifier = Modifier.padding(end = 0.dp)
 		)
 	}
+}
+
+@Preview
+@Composable
+fun MainPreview() {
+	Main()
 }
