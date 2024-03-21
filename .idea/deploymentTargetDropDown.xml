@@ -2,13 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="LastStep">
+        <State />
+      </entry>
       <entry key="LocationPreview">
         <State />
       </entry>
       <entry key="MainPreview">
         <State />
       </entry>
-      <entry key="SignUp">
+      <entry key="MoreInfoPreview">
         <State />
       </entry>
       <entry key="TopAppBarPreview">
