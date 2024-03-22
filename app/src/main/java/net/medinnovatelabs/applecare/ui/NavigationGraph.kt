@@ -1,6 +1,7 @@
 package net.medinnovatelabs.applecare.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -19,6 +20,7 @@ enum class Destinations(@StringRes val route: Int) {
 	Main(route = R.string.main)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationGraph(
 	navController: NavHostController,
@@ -65,7 +67,7 @@ fun NavigationGraph(
 
 			composable(route = "AllSet") {
 				LastStep(nav = {
-					navController.navigate(Destinations.Main.name ) {
+					navController.navigate(Destinations.Main.name) {
 						popUpTo(Destinations.Auth.name) { inclusive = true }
 					}
 				})
@@ -73,9 +75,10 @@ fun NavigationGraph(
 		}
 
 		composable(route = Destinations.Main.name) {
-			Main()
+			Main(onCamera = { })
 		}
 
-
 	}
+
+
 }
