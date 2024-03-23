@@ -47,12 +47,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import net.medinnovatelabs.applecare.R
 
 @Composable
 fun SignUp(
-    onSignUp: () -> Unit,
-    onSignIn: () -> Unit
+    navController: NavHostController
 ){
     Column {
         Text(
@@ -74,11 +74,11 @@ fun SignUp(
         Spacer(modifier = Modifier.height(27.dp))
         PreviewPassword1TextField()
         Spacer(modifier = Modifier.height(30.dp))
-        RegisterButton( onSignUp = onSignUp )
+        RegisterButton( navController)
         Spacer(modifier = Modifier.height(36.dp))
         Google1LogIn()
         Spacer(modifier = Modifier.height(27.dp))
-        SignInPrompt(onSignIn = onSignIn)
+        SignInPrompt(navController)
     }
 }
 
@@ -268,13 +268,13 @@ fun PreviewPassword1TextField() {
 
 @Composable
 fun RegisterButton(
-    onSignUp: () -> Unit
+    navController: NavHostController
 ){
     Column (
         modifier = Modifier.padding(horizontal = 24.dp)
     ){
         Button(
-            onClick = { onSignUp() },
+            onClick = { navController.navigate("MoreInfo") },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF5DB075)
             ),
@@ -355,7 +355,7 @@ fun Google1LogIn(){
 
 @Composable
 fun SignInPrompt(
-    onSignIn: () -> Unit
+    navController: NavHostController
 ) {
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -373,7 +373,7 @@ fun SignInPrompt(
             text = "Sign In",
             color = Color(0xFF5DB075),
             modifier = Modifier.clickable {
-                onSignIn()
+                navController.navigate("Login")
             }
         )
     }

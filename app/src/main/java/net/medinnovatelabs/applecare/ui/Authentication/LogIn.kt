@@ -52,14 +52,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import net.medinnovatelabs.applecare.R
 
 
 @Composable
 fun LogIn(
-	onLogin: () -> Unit,
-	onSignUp: () -> Unit,
-	modifier: Modifier = Modifier
+	navController: NavHostController
 ) {
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally
@@ -87,11 +86,11 @@ fun LogIn(
 
 		Spacer(modifier = Modifier.height(42.dp))
 
-		LogButton(onLogin = onLogin)
+		LogButton(navController)
 
 		Spacer(modifier = Modifier.height(42.dp))
 
-		GoogleLogIn(onSignUp = onSignUp)
+		GoogleLogIn(navController)
 
 	}
 }
@@ -341,12 +340,12 @@ fun MyScreen() {
 }
 
 @Composable
-fun LogButton(onLogin: () -> Unit) {
+fun LogButton(navController: NavHostController) {
 	Column(
 		modifier = Modifier.padding(horizontal = 24.dp)
 	) {
 		Button(
-			onClick = onLogin,
+			onClick = {navController.navigate("camera")},
 			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 			modifier = Modifier
 				.fillMaxWidth()
@@ -399,7 +398,7 @@ fun LogButton(onLogin: () -> Unit) {
 
 @Composable
 fun GoogleLogIn(
-	onSignUp: () -> Unit
+	navController: NavHostController
 ) {
 	OutlinedButton(
 		onClick = { /****do this****/ },
@@ -431,7 +430,7 @@ fun GoogleLogIn(
 			"Don't have an account?",
 			fontSize = 14.sp
 		)
-		TextButton(onClick = { onSignUp() }) {
+		TextButton(onClick = { navController.navigate("Signup")}) {
 			Text(
 				text = "Signup",
 				fontSize = 14.sp,
