@@ -13,14 +13,16 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import com.example.compose.AppleCareTheme
-import net.medinnovatelabs.applecare.ui.Authentication.LastStep
+import net.medinnovatelabs.applecare.ui.Authentication.AllSet
 import net.medinnovatelabs.applecare.ui.Authentication.LogIn
 import net.medinnovatelabs.applecare.ui.Authentication.MoreInfo
+import net.medinnovatelabs.applecare.ui.Authentication.OnBoardingScreen
 import net.medinnovatelabs.applecare.ui.Authentication.SignUp
 import net.medinnovatelabs.applecare.ui.Camera.Camera
+import net.medinnovatelabs.applecare.ui.Destinations
 import net.medinnovatelabs.applecare.ui.Main.Main
-import net.medinnovatelabs.applecare.ui.OnBoardingScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -29,65 +31,65 @@ class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
-//			AppleCareTheme {
-//				if (!hasRequiredPermissions()) {
-//					ActivityCompat.requestPermissions(
-//						this@MainActivity, CAMERAX_PERMISSIONS, 0
-//					)
-//
-//				}
-//
-//				// Camera() - Works here but not inside navgraph
-//				NavigationGraph(
-//					navController = rememberNavController(),
-//					startDestination = Destinations.Main.name
-//				)
-//
-//
-//			}
-			val navController = rememberNavController()
-			NavHost(navController = navController, startDestination = "onboard"){
-				composable(route = "onboard") {
-					OnBoardingScreen(navController)
+			AppleCareTheme {
+				val navController = rememberNavController()
+				NavHost(navController = navController, startDestination = Destinations.Auth.name) {
+					navigation(route = Destinations.Auth.name, startDestination = "onboard") {
+						composable(route = "onboard") {
+							OnBoardingScreen(
+								onSkip = { navController.navigate("Login") }
+							)
+						}
+
+						composable(route = "Login") {
+							LogIn(
+								onLogin = { navController.navigate(Destinations.Main.name) },
+								onSignup = { navController.navigate("Signup") }
+							)
+						}
+
+						composable(route = "Signup") {
+							SignUp(
+								onSignUp = { navController.navigate("MoreInfo") },
+								onSignIn = { navController.navigate("Login") }
+							)
+						}
+
+						composable(route = "MoreInfo") {
+							MoreInfo(
+								onCompleteReg = { navController.navigate("AllSet") },
+								onBack = { navController.popBackStack() }
+							)
+						}
+
+						composable(route = "AllSet") {
+							 AllSet(onDelay = {
+								navController.navigate(Destinations.Main.name) {
+									popUpTo(Destinations.Auth.name) { inclusive = true }
+								}
+							 })
+						}
+					}
+
+					composable("camera") {
+						if (!hasRequiredPermissions()) {
+							ActivityCompat.requestPermissions(
+								this@MainActivity, CAMERAX_PERMISSIONS, 0
+							)
+						}
+						Camera()
+					}
+
+					composable(route = Destinations.Main.name) {
+						Main(onCamera = {
+							navController.navigate("camera")
+						})
+					}
 				}
 
-				composable(route = "Login") {
-					LogIn(
-						navController
-					)
-				}
-
-				composable("Signup") {
-					SignUp(
-						navController
-					)
-				}
-
-				composable( "MoreInfo") {
-					MoreInfo(
-						navController
-					)
-				}
-
-				composable( "AllSet") {
-					LastStep(navController)
-				}
-
-
-
-
-			composable("camera"){
-				if (!hasRequiredPermissions()){
-					ActivityCompat.requestPermissions(
-						this@MainActivity, CAMERAX_PERMISSIONS, 0
-					)
-				}
-				Camera(navController = navController)
 			}
-
-			}
-
 		}
+
 	}
 
 	private fun hasRequiredPermissions(): Boolean {

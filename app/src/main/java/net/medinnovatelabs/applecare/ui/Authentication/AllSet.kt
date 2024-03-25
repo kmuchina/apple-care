@@ -23,14 +23,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import net.medinnovatelabs.applecare.R
 
 @Composable
-fun LastStep(
-	navController: NavHostController,
+fun AllSet(
+	onDelay: () -> Unit
 ){
 	Column (
 		horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,13 +68,13 @@ fun LastStep(
 		)
 	}
 	LaunchedEffect(Unit) {
-		delay(2000L)
-		navController.navigate("Login")
+		delay(1500L)
+		onDelay()
 	}
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AllSetPreview() {
-	LastStep(rememberNavController())
+	AllSet(onDelay = { })
 }

@@ -74,7 +74,6 @@ import net.medinnovatelabs.applecare.R
 enum class MainDestinations(@StringRes val route: Int) {
 	Home(route = R.string.home),
 	History(route = R.string.history),
-	Camera(route = R.string.camera),
 	Community(route = R.string.community),
 	Profile(route = R.string.profile)
 }
@@ -232,9 +231,7 @@ fun Main(
 			floatingActionButtonPosition = FabPosition.Center,
 			floatingActionButton = {
 				FloatingActionButton(
-					onClick = {
-						navController.navigate(MainDestinations.Camera.name)
-					},
+					onClick = { onCamera() },
 					shape = CircleShape,
 					modifier = Modifier
 						.size(48.dp)
@@ -260,10 +257,7 @@ fun Main(
 				composable(MainDestinations.History.name) {
 					Text("History")
 				}
-				composable(route = MainDestinations.Camera.name) {
-					// Text(text = "hello")
-					GalleryImagePicker()
-				}
+
 				composable(MainDestinations.Community.name) {
 					Text("Community")
 				}

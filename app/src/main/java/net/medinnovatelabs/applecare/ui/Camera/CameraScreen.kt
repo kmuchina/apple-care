@@ -1,16 +1,11 @@
 package net.medinnovatelabs.applecare.ui.Camera
 
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -36,10 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cameraswitch
-import androidx.compose.material.icons.outlined.FlashOff
-import androidx.compose.material.icons.outlined.FlashOn
-import androidx.compose.material.icons.outlined.FlashlightOff
-import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.BottomSheetScaffold
@@ -48,24 +39,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.medinnovatelabs.applecare.R
 import java.io.File
@@ -74,7 +58,7 @@ import java.io.InputStream
 
 @ExperimentalMaterial3Api
 @Composable
-fun Camera(navController: NavHostController) {
+fun Camera() {
 	val logger = KotlinLogging.logger {}
 	val context = LocalContext.current
 	val controller = remember {
@@ -126,7 +110,6 @@ fun Camera(navController: NavHostController) {
 			)
 			Row(
 				modifier = Modifier
-//					.fillMaxWidth()
 					.align(Alignment.TopStart)
 					.padding(16.dp),
 				horizontalArrangement = Arrangement.SpaceAround

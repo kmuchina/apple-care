@@ -61,7 +61,7 @@ fun HomeTopAppBar(
 				badge = {
 					Badge(
 						modifier = Modifier
-							.offset (y = 19.dp, x = (-19).dp)
+							.offset (y = 10.dp, x = (-17).dp)
 							.size(10.dp),
 					) {
 					}

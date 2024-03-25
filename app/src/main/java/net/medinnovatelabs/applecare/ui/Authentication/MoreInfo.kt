@@ -41,17 +41,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.data.constituenciesByCounty
 import net.medinnovatelabs.applecare.data.counties
 
 @Composable
 fun MoreInfo(
-	navController: NavHostController
+	onCompleteReg: () -> Unit,
+	onBack: () -> Unit
 ) {
 
 	Column {
@@ -82,7 +81,7 @@ fun MoreInfo(
 			verticalArrangement = Arrangement.Center
 		) {
 			Button(
-				onClick = { navController.navigate("AllSet") },
+				onClick = onCompleteReg,
 				colors = ButtonDefaults.buttonColors(
 					containerColor = Color(0xFF5DB075)
 				),
@@ -103,7 +102,7 @@ fun MoreInfo(
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			TextButton(onClick = { navController.popBackStack() }) {
+			TextButton(onClick = onBack) {
 				Text(
 					text = "Back",
 					color = Color(0xFF000000),
@@ -150,9 +149,7 @@ fun IdInputScreen() {
 	var id by remember { mutableStateOf("") }
 
 	Column(
-		modifier = Modifier
-			.fillMaxWidth(),
-//            .padding(16.dp),
+		modifier = Modifier.fillMaxWidth(),
 		verticalArrangement = Arrangement.Center,
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {

@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui
+package net.medinnovatelabs.applecare.ui.Authentication
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -26,16 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.example.compose.AppleCareTheme
 import net.medinnovatelabs.applecare.R
 
 @Composable
 fun OnBoardingScreen(
-	navController: NavHostController
+	onSkip: () -> Unit
 ) {
 	var result = remember { mutableIntStateOf(1) }
 
@@ -85,8 +82,8 @@ fun OnBoardingScreen(
 		) {
 			Button(
 				onClick = {
-					if(result.value < 3) result.value++
-					else navController.navigate("Login")
+					if (result.value < 3) result.value++
+					else onSkip()
 				},
 				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 				modifier = Modifier
@@ -106,7 +103,7 @@ fun OnBoardingScreen(
 
 			Spacer(modifier = Modifier.height(8.dp))
 
-			TextButton(onClick = { navController.navigate("Login") }) {
+			TextButton(onClick = onSkip) {
 				Text(
 					text = stringResource(R.string.skip),
 					color = Color(0xFF000000)
@@ -118,7 +115,7 @@ fun OnBoardingScreen(
 		Spacer(Modifier.height(48.dp))
 
 		Row {
-			if(result.value == 1){
+			if (result.value == 1) {
 				Canvas(modifier = Modifier.size(8.dp), onDraw = {
 					drawCircle(color = Color(0xFF5DB075))
 				})
@@ -130,7 +127,7 @@ fun OnBoardingScreen(
 
 			Spacer(modifier = Modifier.width(8.dp))
 
-			if(result.value == 2){
+			if (result.value == 2) {
 				Canvas(modifier = Modifier.size(8.dp), onDraw = {
 					drawCircle(color = Color(0xFF5DB075))
 				})
@@ -142,7 +139,7 @@ fun OnBoardingScreen(
 
 			Spacer(modifier = Modifier.width(8.dp))
 
-			if(result.value > 2){
+			if (result.value > 2) {
 				Canvas(modifier = Modifier.size(8.dp), onDraw = {
 					drawCircle(color = Color(0xFF5DB075))
 				})
