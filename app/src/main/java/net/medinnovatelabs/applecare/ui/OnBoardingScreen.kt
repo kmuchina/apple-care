@@ -29,13 +29,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.compose.AppleCareTheme
 import net.medinnovatelabs.applecare.R
 
 @Composable
 fun OnBoardingScreen(
-	onSkip: () -> Unit = { },
-	modifier: Modifier = Modifier
+	navController: NavHostController
 ) {
 	var result = remember { mutableIntStateOf(1) }
 
@@ -53,7 +53,7 @@ fun OnBoardingScreen(
 	Column(
 		verticalArrangement = Arrangement.SpaceBetween,
 		horizontalAlignment = Alignment.CenterHorizontally,
-		modifier = modifier
+		modifier = Modifier
 			.fillMaxSize()
 			.fillMaxHeight()
 			.wrapContentSize(Alignment.Center),
@@ -86,7 +86,7 @@ fun OnBoardingScreen(
 			Button(
 				onClick = {
 					if(result.value < 3) result.value++
-					else onSkip()
+					else navController.navigate("Login")
 				},
 				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
 				modifier = Modifier
@@ -106,7 +106,7 @@ fun OnBoardingScreen(
 
 			Spacer(modifier = Modifier.height(8.dp))
 
-			TextButton(onClick = onSkip) {
+			TextButton(onClick = { navController.navigate("Login") }) {
 				Text(
 					text = stringResource(R.string.skip),
 					color = Color(0xFF000000)
@@ -115,7 +115,7 @@ fun OnBoardingScreen(
 			}
 		}
 
-		Spacer(modifier.height(48.dp))
+		Spacer(Modifier.height(48.dp))
 
 		Row {
 			if(result.value == 1){
@@ -154,13 +154,5 @@ fun OnBoardingScreen(
 		}
 
 
-	}
-}
-
-@Preview(showBackground = true)
-@Composable
-fun OnBoardingPreview() {
-	AppleCareTheme {
-		OnBoardingScreen()
 	}
 }

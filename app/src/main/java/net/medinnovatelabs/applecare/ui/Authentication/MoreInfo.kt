@@ -44,14 +44,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.data.constituenciesByCounty
 import net.medinnovatelabs.applecare.data.counties
 
 @Composable
 fun MoreInfo(
-	onCompleteReg: () -> Unit,
-	onBack: () -> Unit
+	navController: NavHostController
 ) {
 
 	Column {
@@ -82,7 +82,7 @@ fun MoreInfo(
 			verticalArrangement = Arrangement.Center
 		) {
 			Button(
-				onClick = { onCompleteReg() },
+				onClick = { navController.navigate("AllSet") },
 				colors = ButtonDefaults.buttonColors(
 					containerColor = Color(0xFF5DB075)
 				),
@@ -103,7 +103,7 @@ fun MoreInfo(
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			TextButton(onClick = { onBack() }) {
+			TextButton(onClick = { navController.popBackStack() }) {
 				Text(
 					text = "Back",
 					color = Color(0xFF000000),
@@ -365,11 +365,3 @@ fun LocationDetails() {
 	}
 }
 
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun MoreInfoPreview() {
-	MoreInfo(
-		onBack = { },
-		onCompleteReg = { }
-	)
-}

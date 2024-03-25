@@ -1,16 +1,30 @@
 package net.medinnovatelabs.applecare.ui.Camera
 
+import android.app.Activity
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,8 +32,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cameraswitch
+import androidx.compose.material.icons.outlined.FlashOff
+import androidx.compose.material.icons.outlined.FlashOn
+import androidx.compose.material.icons.outlined.FlashlightOff
+import androidx.compose.material.icons.outlined.FlashlightOn
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.BottomSheetScaffold
@@ -28,31 +48,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.medinnovatelabs.applecare.R
 import java.io.File
+import java.io.InputStream
 
 
 @ExperimentalMaterial3Api
-@Preview
 @Composable
-fun Camera() {
-
+fun Camera(navController: NavHostController) {
 	val logger = KotlinLogging.logger {}
-
 	val context = LocalContext.current
 	val controller = remember {
 		LifecycleCameraController(context).apply {
@@ -64,9 +87,23 @@ fun Camera() {
 	}
 	val scaffoldState = rememberBottomSheetScaffoldState()
 	val scope = rememberCoroutineScope()
-
 	val viewModel = viewModel<MainViewModel>()
 	val bitmaps by viewModel.bitmaps.collectAsState()
+
+	// ActivityResultLauncher for handling gallery opening and result
+	val galleryLauncher = rememberLauncherForActivityResult(
+		contract = ActivityResultContracts.GetContent(),
+		onResult = { uri ->
+			// Handle the selected image URI
+			uri?.let { selectedUri ->
+				val selectedBitmap = selectedUri.toBitmap(context.contentResolver)
+				selectedBitmap?.let { bitmap ->
+					// Use viewModel.onTakePhoto(bitmap) to handle the selected image
+					viewModel.onTakePhoto(bitmap)
+				}
+			}
+		}
+	)
 
 	BottomSheetScaffold(
 		scaffoldState = scaffoldState,
@@ -74,14 +111,10 @@ fun Camera() {
 		sheetContent = {
 			PhotoBottomSheetContent(
 				bitmaps = bitmaps,
-				modifier = Modifier
-					.fillMaxWidth()
-
+				modifier = Modifier.fillMaxWidth()
 			)
 		}
 	) { padding ->
-
-
 		Box(
 			modifier = Modifier
 				.fillMaxSize()
@@ -89,70 +122,148 @@ fun Camera() {
 		) {
 			CameraPreview(
 				controller = controller,
-				modifier = Modifier
-					.fillMaxSize()
+				modifier = Modifier.fillMaxSize()
 			)
-			IconButton(
-				onClick = {
-					controller.cameraSelector =
-						if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-							CameraSelector.DEFAULT_FRONT_CAMERA
-						} else CameraSelector.DEFAULT_BACK_CAMERA
-				},
-				modifier = Modifier
-					.offset(16.dp, 16.dp)
-			) {
-				Icon(
-					imageVector = Icons.Outlined.Cameraswitch,
-					contentDescription = "Switch Camera",
-					tint = Color(0xFF0D5210)
-				)
-
-			}
 			Row(
 				modifier = Modifier
-					.fillMaxWidth()
-					.align(Alignment.BottomCenter)
+//					.fillMaxWidth()
+					.align(Alignment.TopStart)
 					.padding(16.dp),
 				horizontalArrangement = Arrangement.SpaceAround
 			) {
-				IconButton(
-					onClick = {
+				Box(
+					contentAlignment = Alignment.Center,
+					modifier = Modifier.size(56.dp)
+				) {
+					Box(
+						modifier = Modifier
+							.size(48.dp)
+							.background(Color.White, shape = CircleShape)
+							.clickable( // Wrap Box with Clickable
+								onClick = {
+									Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT).show()
 
-						scope.launch {
+									controller.cameraSelector =
+										if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+											CameraSelector.DEFAULT_FRONT_CAMERA
+										} else CameraSelector.DEFAULT_BACK_CAMERA
 
-							scaffoldState.bottomSheetState.expand()
+								}
+							)
+					) {
+
+						IconButton(
+							onClick = {
+								Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT).show()
+
+								controller.cameraSelector =
+									if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+										CameraSelector.DEFAULT_FRONT_CAMERA
+									} else CameraSelector.DEFAULT_BACK_CAMERA
+							}
+						) {
+							Icon(
+								imageVector = Icons.Outlined.Cameraswitch,
+								contentDescription = "Switch Camera",
+								tint = Color(0xFF0D5210)
+							)
 
 						}
-					}) {
-					Icon(
-						imageVector = Icons.Outlined.Photo,
-						contentDescription = "Open Gallery",
-						tint = Color(0xFF0C3A0E)
-					)
-
+					}
 				}
-				IconButton(
-					onClick = {
-						takePhoto(
-							controller = controller,
-							context = context,
-							onPhotoTaken = viewModel::onTakePhoto
-						)
-					}) {
-					Icon(
-						imageVector = Icons.Outlined.PhotoCamera,
-						contentDescription = "Take Photo",
-						tint = Color(0xFF0C3A0E)
-					)
+			}
+			// Gallery button
+			Row(
+				modifier = Modifier
+//					.fillMaxWidth()
+					.align(Alignment.BottomStart)
+					.padding(16.dp),
+				horizontalArrangement = Arrangement.SpaceAround
+			) {
+				Box(
+					contentAlignment = Alignment.Center,
+					modifier = Modifier.size(56.dp)
+				) {
+					Box(
+						modifier = Modifier
+							.size(48.dp)
+							.background(Color.White, shape = CircleShape)
+							.clickable( // Wrap Box with Clickable
+								onClick = {
+									Toast.makeText(context, "A moment please...🫸🏾...Opening your Gallery...📸", Toast.LENGTH_SHORT).show()
 
+									galleryLauncher.launch("image/*")
+								}
+							)
+					) {
+
+						IconButton(
+							onClick = {
+								// Open gallery when clicked
+								Toast.makeText(context, "A moment please...🫸🏾...Opening your Gallery...📸", Toast.LENGTH_SHORT).show()
+
+								galleryLauncher.launch("image/*")
+							},
+							modifier = Modifier
+								.align(Alignment.BottomStart)
+								.padding(16.dp) .fillMaxSize()
+						) {
+							Icon(
+								imageVector = Icons.Outlined.Photo,
+								contentDescription = "Open Gallery",
+								tint = Color(0xFF0C3A0E),
+								modifier = Modifier.fillMaxSize()
+							)
+						}
+					}
 				}
 			}
 
+
+			Box(
+				contentAlignment = Alignment.BottomEnd,
+				modifier = Modifier.size(56.dp) .offset(x = 299.dp, y = 710.dp)
+			) {
+				Box(
+					modifier = Modifier
+						.size(48.dp)
+						.background(Color.White, shape = CircleShape)
+						.clickable( // Wrap Box with Clickable
+							onClick = {
+								takePhoto(
+									controller = controller,
+									context = context,
+									onPhotoTaken = viewModel::onTakePhoto
+								)
+							}
+						)
+				) {
+					IconButton(
+						onClick = {
+							takePhoto(
+								controller = controller,
+								context = context,
+								onPhotoTaken = viewModel::onTakePhoto
+							)
+						},
+						modifier = Modifier
+							.align(Alignment.BottomEnd)
+							.padding(16.dp)
+					) {
+						Icon(
+							imageVector = Icons.Outlined.PhotoCamera,
+							contentDescription = "Take Photo",
+							tint = Color(0xFF0C3A0E)
+						)
+					}
+				}
+			}
+
+
 		}
 	}
-
 }
+
 
 fun takePhoto(
 	controller: LifecycleCameraController,
@@ -170,24 +281,30 @@ fun takePhoto(
 				val bitmap = image.toBitmap()
 				image.close()
 
-				savePhotoToGallery(context, bitmap)
+				val rotationDegrees = image.imageInfo.rotationDegrees
+				val rotatedBitmap = rotateBitmap(bitmap, rotationDegrees)
 
-				onPhotoTaken(bitmap)
+				savePhotoToGallery(context, rotatedBitmap)
+
+				// Show toast message
+				Toast.makeText(context, "Photo captured successfully...🍏...🎉🎉", Toast.LENGTH_SHORT).show()
+
+				onPhotoTaken(rotatedBitmap)
 			}
 
 			override fun onError(exception: ImageCaptureException) {
 				super.onError(exception)
 				Log.e("Camera", "Couldn't take photo: 🥲", exception)
 			}
-//            private fun imageProxyToBitmap(image: ImageProxy): Bitmap? {
-//                val buffer = image.planes[0].buffer
-//                val bytes = ByteArray(buffer.capacity()) // Increase the capacity of the byte array
-//                buffer.get(bytes)
-//                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-//                return Bitmap.createScaledBitmap(bitmap, 256, 256, false)
-//            }
 		}
 	)
+}
+
+
+private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
+	val matrix = Matrix()
+	matrix.postRotate(degrees.toFloat())
+	return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
 }
 
 private fun savePhotoToGallery(context: Context, bitmap: Bitmap) {
@@ -221,3 +338,18 @@ private fun getOutputDirectory(context: Context): File {
 	return if (mediaDir != null && mediaDir.exists())
 		mediaDir else context.filesDir
 }
+fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
+	var inputStream: InputStream? = null
+	return try {
+		inputStream = contentResolver.openInputStream(this)
+		BitmapFactory.decodeStream(inputStream)
+	} catch (e: Exception) {
+		e.printStackTrace()
+		null
+	} finally {
+		inputStream?.close()
+	}
+}
+
+
+private const val galleryRequestCode = 100
