@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			AppleCareTheme {
 				val navController = rememberNavController()
-				NavHost(navController = navController, startDestination = Destinations.Auth.name) {
+				NavHost(navController = navController, startDestination = Destinations.Main.name) {
 					navigation(route = Destinations.Auth.name, startDestination = "onboard") {
 						composable(route = "onboard") {
 							OnBoardingScreen(
@@ -63,11 +63,11 @@ class MainActivity : ComponentActivity() {
 						}
 
 						composable(route = "AllSet") {
-							 AllSet(onDelay = {
+							AllSet(onDelay = {
 								navController.navigate(Destinations.Main.name) {
 									popUpTo(Destinations.Auth.name) { inclusive = true }
 								}
-							 })
+							})
 						}
 					}
 

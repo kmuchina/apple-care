@@ -1,21 +1,12 @@
 package net.medinnovatelabs.applecare.ui.Main
 
-import android.graphics.BitmapFactory
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -28,7 +19,6 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
@@ -49,15 +39,11 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -231,7 +217,9 @@ fun Main(
 			floatingActionButtonPosition = FabPosition.Center,
 			floatingActionButton = {
 				FloatingActionButton(
-					onClick = { onCamera() },
+					onClick = {
+						onCamera()
+					},
 					shape = CircleShape,
 					modifier = Modifier
 						.size(48.dp)
@@ -392,44 +380,6 @@ fun BottomNavigationBar(
 		)
 	}
 }
-
-
-@Composable
-fun GalleryImagePicker() {
-	val context = LocalContext.current
-	val imageUri = remember { mutableStateOf<Uri?>(null) }
-
-	val launcher =
-		rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
-			imageUri.value = uri
-		}
-
-	Column(
-		verticalArrangement = Arrangement.SpaceBetween,
-		horizontalAlignment = Alignment.CenterHorizontally,
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(top = 40.dp, bottom = 40.dp)
-	) {
-		Button(onClick = { launcher.launch("image/*") }) {
-			Text("Pick an image from gallery")
-		}
-		if (imageUri.value != null) {
-			val bitmap = context.contentResolver.openInputStream(imageUri.value!!)?.use {
-				BitmapFactory.decodeStream(it)
-			}!!
-
-			Image(
-				bitmap = bitmap.asImageBitmap(),
-				contentDescription = "Selected Image",
-				modifier = Modifier
-					.width(400.dp)
-					.height(300.dp)
-			)
-		}
-	}
-}
-
 
 @Preview
 @Composable

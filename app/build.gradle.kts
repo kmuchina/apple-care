@@ -39,6 +39,7 @@ android {
 	}
 	buildFeatures {
 		compose = true
+		mlModelBinding = true
 	}
 	composeOptions {
 		kotlinCompilerExtensionVersion = "1.5.1"
@@ -80,6 +81,9 @@ dependencies {
 	implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
 
 	implementation(libs.firebase.auth)
+	implementation(libs.tensorflow.lite.support)
+	implementation(libs.tensorflow.lite.metadata)
+	implementation(libs.tensorflow.lite.gpu)
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)

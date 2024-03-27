@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,19 +46,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import mu.KotlinLogging
 import net.medinnovatelabs.applecare.R
 import java.io.File
 import java.io.InputStream
 
-
 @ExperimentalMaterial3Api
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun Camera() {
-	val logger = KotlinLogging.logger {}
 	val context = LocalContext.current
 	val controller = remember {
 		LifecycleCameraController(context).apply {
@@ -72,7 +70,8 @@ fun Camera() {
 	val scaffoldState = rememberBottomSheetScaffoldState()
 	val scope = rememberCoroutineScope()
 	val viewModel = viewModel<MainViewModel>()
-	val bitmaps by viewModel.bitmaps.collectAsState()
+	val bitmap by viewModel.bitmaps.collectAsState()
+	val sheetPeekHeight by viewModel.sheetPeekHeight.collectAsState()
 
 	// ActivityResultLauncher for handling gallery opening and result
 	val galleryLauncher = rememberLauncherForActivityResult(
@@ -91,12 +90,17 @@ fun Camera() {
 
 	BottomSheetScaffold(
 		scaffoldState = scaffoldState,
-		sheetPeekHeight = 0.dp,
+		sheetPeekHeight = sheetPeekHeight.dp,
 		sheetContent = {
-			PhotoBottomSheetContent(
-				bitmaps = bitmaps,
-				modifier = Modifier.fillMaxWidth()
-			)
+			// PhotoBottomSheetContent( bitmaps = bitmaps, modifier = Modifier.fillMaxWidth())
+			bitmap?.let {
+				PhotoBottomSheetContent(
+					bitmap = it,
+					onDismiss = {
+						viewModel.onTakePhoto(null)
+					}
+				)
+			}
 		}
 	) { padding ->
 		Box(
@@ -108,110 +112,98 @@ fun Camera() {
 				controller = controller,
 				modifier = Modifier.fillMaxSize()
 			)
-			Row(
-				modifier = Modifier
-					.align(Alignment.TopStart)
-					.padding(16.dp),
-				horizontalArrangement = Arrangement.SpaceAround
-			) {
-				Box(
-					contentAlignment = Alignment.Center,
-					modifier = Modifier.size(56.dp)
-				) {
-					Box(
-						modifier = Modifier
-							.size(48.dp)
-							.background(Color.White, shape = CircleShape)
-							.clickable( // Wrap Box with Clickable
-								onClick = {
-									Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT).show()
-
-									controller.cameraSelector =
-										if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-											CameraSelector.DEFAULT_FRONT_CAMERA
-										} else CameraSelector.DEFAULT_BACK_CAMERA
-
-								}
-							)
-					) {
-
-						IconButton(
-							onClick = {
-								Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT).show()
-
-								controller.cameraSelector =
-									if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-										CameraSelector.DEFAULT_FRONT_CAMERA
-									} else CameraSelector.DEFAULT_BACK_CAMERA
-							}
-						) {
-							Icon(
-								imageVector = Icons.Outlined.Cameraswitch,
-								contentDescription = "Switch Camera",
-								tint = Color(0xFF0D5210)
-							)
-
-						}
-					}
-				}
-			}
-			// Gallery button
-			Row(
-				modifier = Modifier
-//					.fillMaxWidth()
-					.align(Alignment.BottomStart)
-					.padding(16.dp),
-				horizontalArrangement = Arrangement.SpaceAround
-			) {
-				Box(
-					contentAlignment = Alignment.Center,
-					modifier = Modifier.size(56.dp)
-				) {
-					Box(
-						modifier = Modifier
-							.size(48.dp)
-							.background(Color.White, shape = CircleShape)
-							.clickable( // Wrap Box with Clickable
-								onClick = {
-									Toast.makeText(context, "A moment please...🫸🏾...Opening your Gallery...📸", Toast.LENGTH_SHORT).show()
-
-									galleryLauncher.launch("image/*")
-								}
-							)
-					) {
-
-						IconButton(
-							onClick = {
-								// Open gallery when clicked
-								Toast.makeText(context, "A moment please...🫸🏾...Opening your Gallery...📸", Toast.LENGTH_SHORT).show()
-
-								galleryLauncher.launch("image/*")
-							},
-							modifier = Modifier
-								.align(Alignment.BottomStart)
-								.padding(16.dp) .fillMaxSize()
-						) {
-							Icon(
-								imageVector = Icons.Outlined.Photo,
-								contentDescription = "Open Gallery",
-								tint = Color(0xFF0C3A0E),
-								modifier = Modifier.fillMaxSize()
-							)
-						}
-					}
-				}
-			}
-
-
 			Box(
-				contentAlignment = Alignment.BottomEnd,
-				modifier = Modifier.size(56.dp) .offset(x = 299.dp, y = 710.dp)
+				contentAlignment = Alignment.Center,
+				modifier = Modifier
+					.padding(horizontal = 24.dp, vertical = 16.dp)
+					.size(48.dp)
+					.background(Color.White, shape = CircleShape)
+					.clickable( // Wrap Box with Clickable
+						onClick = {
+							Toast
+								.makeText(
+									context,
+									"Camera switching in 1...2..",
+									Toast.LENGTH_SHORT
+								)
+								.show()
+							controller.cameraSelector =
+								if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+									CameraSelector.DEFAULT_FRONT_CAMERA
+								} else CameraSelector.DEFAULT_BACK_CAMERA
+						}
+					)
+			) {
+				IconButton(
+					onClick = {
+						Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT)
+							.show()
+
+						controller.cameraSelector =
+							if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+								CameraSelector.DEFAULT_FRONT_CAMERA
+							} else CameraSelector.DEFAULT_BACK_CAMERA
+					}
+				) {
+					Icon(
+						imageVector = Icons.Outlined.Cameraswitch,
+						contentDescription = "Switch Camera",
+						tint = Color(0xFF0D5210)
+					)
+				}
+			}
+
+
+			Row(
+				horizontalArrangement = Arrangement.SpaceBetween,
+				modifier = Modifier
+					.align(Alignment.BottomStart)
+					.fillMaxWidth()
+					.padding(horizontal = 20.dp)
 			) {
 				Box(
 					modifier = Modifier
+						.padding(16.dp)
 						.size(48.dp)
 						.background(Color.White, shape = CircleShape)
-						.clickable( // Wrap Box with Clickable
+						.clickable(
+							onClick = {
+								Toast
+									.makeText(
+										context,
+										"A moment please...🫸🏾...Opening your Gallery...📸",
+										Toast.LENGTH_SHORT
+									)
+									.show()
+								galleryLauncher.launch("image/*")
+							}
+						)
+				) {
+					IconButton(
+						onClick = {
+							// Open gallery when clicked
+							Toast.makeText(
+								context,
+								"A moment please...🫸🏾...Opening your Gallery...📸",
+								Toast.LENGTH_SHORT
+							).show()
+							galleryLauncher.launch("image/*")
+						}
+					) {
+						Icon(
+							imageVector = Icons.Outlined.Photo,
+							contentDescription = "Open Gallery",
+							tint = Color(0xFF0C3A0E)
+						)
+					}
+				}
+
+				Box(
+					modifier = Modifier
+						.padding(16.dp)
+						.size(48.dp)
+						.background(Color.White, shape = CircleShape)
+						.clickable(
 							onClick = {
 								takePhoto(
 									controller = controller,
@@ -228,10 +220,7 @@ fun Camera() {
 								context = context,
 								onPhotoTaken = viewModel::onTakePhoto
 							)
-						},
-						modifier = Modifier
-							.align(Alignment.BottomEnd)
-							.padding(16.dp)
+						}
 					) {
 						Icon(
 							imageVector = Icons.Outlined.PhotoCamera,
@@ -241,14 +230,12 @@ fun Camera() {
 					}
 				}
 			}
-
-
 		}
 	}
 }
 
 
-fun takePhoto(
+private fun takePhoto(
 	controller: LifecycleCameraController,
 	context: Context,
 	onPhotoTaken: (Bitmap) -> Unit
@@ -270,7 +257,8 @@ fun takePhoto(
 				savePhotoToGallery(context, rotatedBitmap)
 
 				// Show toast message
-				Toast.makeText(context, "Photo captured successfully...🍏...🎉🎉", Toast.LENGTH_SHORT).show()
+				Toast.makeText(context, "Photo captured successfully...🍏...🎉🎉", Toast.LENGTH_SHORT)
+					.show()
 
 				onPhotoTaken(rotatedBitmap)
 			}
@@ -321,7 +309,8 @@ private fun getOutputDirectory(context: Context): File {
 	return if (mediaDir != null && mediaDir.exists())
 		mediaDir else context.filesDir
 }
-fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
+
+private fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
 	var inputStream: InputStream? = null
 	return try {
 		inputStream = contentResolver.openInputStream(this)
