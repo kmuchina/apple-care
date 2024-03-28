@@ -56,7 +56,8 @@ object TensorFLowHelper {
 			}
 		}
 
-		val classes = arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust")
+		val classes =
+			arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Healthy Apple Leaf")
 
 		callback.invoke(classes[maxPos])
 
