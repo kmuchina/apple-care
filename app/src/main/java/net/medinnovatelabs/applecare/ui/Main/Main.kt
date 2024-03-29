@@ -67,10 +67,13 @@ enum class MainDestinations(@StringRes val route: Int) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Main(
+	location: String,
+	onCamera: () -> Unit,
+	onFindAgro: () -> Unit,
 	modifier: Modifier = Modifier,
 	navController: NavHostController = rememberNavController(),
-	onCamera: () -> Unit
-) {
+
+	) {
 	val backStackEntry by navController.currentBackStackEntryAsState()
 	val currentScreen = MainDestinations.valueOf(
 		backStackEntry?.destination?.route ?: MainDestinations.Home.name
@@ -240,7 +243,7 @@ fun Main(
 				Modifier.padding(innerPadding)
 			) {
 				composable(MainDestinations.Home.name) {
-					Text("Home")
+					Home(location = location, onFindAgro = onFindAgro)
 				}
 				composable(MainDestinations.History.name) {
 					Text("History")
@@ -384,5 +387,5 @@ fun BottomNavigationBar(
 @Preview
 @Composable
 fun MainPreview() {
-	Main(onCamera = { })
+	Main(onCamera = { }, onFindAgro = { }, location = "")
 }

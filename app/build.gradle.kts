@@ -67,8 +67,6 @@ dependencies {
 	implementation("androidx.camera:camera-extensions:1.3.1")
 	implementation("io.github.microutils:kotlin-logging:2.0.6")
 
-
-
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.activity.compose)
@@ -84,6 +82,7 @@ dependencies {
 	implementation(libs.tensorflow.lite.support)
 	implementation(libs.tensorflow.lite.metadata)
 	implementation(libs.tensorflow.lite.gpu)
+	implementation(libs.play.services.location)
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
