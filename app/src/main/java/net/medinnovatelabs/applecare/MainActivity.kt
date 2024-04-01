@@ -15,13 +15,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,7 +26,6 @@ import androidx.navigation.navigation
 import com.example.compose.AppleCareTheme
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.firebasedata.GoogleAuthUiClient
 import net.medinnovatelabs.applecare.firebasedata.SignInViewModel
@@ -51,6 +47,7 @@ class MainActivity : ComponentActivity() {
 			oneTapClient = Identity.getSignInClient(applicationContext)
 		)
 	}
+
 	@OptIn(ExperimentalMaterial3Api::class)
 	@RequiresApi(Build.VERSION_CODES.R)
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,171 +55,152 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			AppleCareTheme {
 				val navController = rememberNavController()
-				NavHost(navController = navController, startDestination = "SignUp"){
+				val startDes = if (googleAuthUiClient.getSignedInUser() != null) {
+					Destinations.Main.name
+				} else {
+					Destinations.Auth.name
+				}
 
-					composable("SignUp"){
-						val viewModel: SignInViewModel by viewModels()
-
-						val state by viewModel.state.collectAsStateWithLifecycle()
-						LaunchedEffect(key1 = Unit){
-							if(googleAuthUiClient.getSignedInUser() != null){
-								navController.navigate("profile")
-							}
+				NavHost(navController = navController, startDestination = startDes) {
+					navigation(route = Destinations.Auth.name, startDestination = "onboard") {
+						composable(route = "onboard") {
+							OnBoardingScreen(
+								onSkip = { navController.navigate("Login") }
+							)
 						}
 
-						val launcher = rememberLauncherForActivityResult(
-							contract = ActivityResultContracts.StartIntentSenderForResult(), onResult = {
-									result ->
-								if(result.resultCode == RESULT_OK){
-									lifecycleScope.launch {
-										val signInResult = googleAuthUiClient.signInWithIntent(
-											intent = result.data ?: return@launch
-										)
-										viewModel.onSignInResult(signInResult)
+						composable(route = "Login") {
+							val viewModel: SignInViewModel by viewModels()
+							val state by viewModel.state.collectAsStateWithLifecycle()
+
+							LaunchedEffect(key1 = Unit) {
+								if (googleAuthUiClient.getSignedInUser() != null) {
+									navController.navigate(Destinations.Main.name)
+								}
+							}
+
+							val launcher = rememberLauncherForActivityResult(
+								contract = ActivityResultContracts.StartIntentSenderForResult(),
+								onResult = { result ->
+									if (result.resultCode == RESULT_OK) {
+										lifecycleScope.launch {
+											val signInResult = googleAuthUiClient.signInWithIntent(
+												intent = result.data ?: return@launch
+											)
+											viewModel.onSignInResult(signInResult)
+										}
 									}
 								}
-							}
-						)
-						SignUp(
-							state = state,
-							onSignInClick = {
-								lifecycleScope.launch {
-									val signInIntentSender = googleAuthUiClient.signIn()
-									launcher.launch(
-										IntentSenderRequest.Builder(
-											signInIntentSender ?: return@launch
-										).build()
-									)
+							)
 
-								}
-							},
-							navController = navController
-						)
-					}
-
-					composable("Login"){
-						val viewModel: SignInViewModel by viewModels()
-						val state by viewModel.state.collectAsStateWithLifecycle()
-
-						LaunchedEffect(key1 = Unit){
-							if(googleAuthUiClient.getSignedInUser() == null){
-								navController.navigate("profile")
-							}
+							LogIn(
+								state = state,
+								onSignInWithGoogle = {
+									lifecycleScope.launch {
+										val signInIntentSender = googleAuthUiClient.signIn()
+										launcher.launch(
+											IntentSenderRequest.Builder(
+												signInIntentSender ?: return@launch
+											).build()
+										)
+									}
+								},
+								onSignUpClick = { navController.navigate("SignUp") },
+								onLoginClick = { navController.navigate(Destinations.Main.name) }
+							)
 						}
 
-						val launcher = rememberLauncherForActivityResult(
-							contract = ActivityResultContracts.StartIntentSenderForResult(), onResult = {
-									result ->
-								if(result.resultCode == RESULT_OK){
-									lifecycleScope.launch {
-										val signInResult = googleAuthUiClient.signInWithIntent(
-											intent = result.data ?: return@launch
-										)
-										viewModel.onSignInResult(signInResult)
-									}
+						composable(route = "SignUp") {
+							val viewModel: SignInViewModel by viewModels()
+
+							val state by viewModel.state.collectAsStateWithLifecycle()
+							LaunchedEffect(key1 = Unit) {
+								if (googleAuthUiClient.getSignedInUser() != null) {
+									navController.navigate(Destinations.Main.name)
 								}
 							}
-						)
 
-
-						LogIn(
-							state = state,
-							onSignInClick = {
-								lifecycleScope.launch {
-									val signInIntentSender = googleAuthUiClient.signIn()
-									launcher.launch(
-										IntentSenderRequest.Builder(
-											signInIntentSender ?: return@launch
-										).build()
-									)
-
+							val launcher = rememberLauncherForActivityResult(
+								contract = ActivityResultContracts.StartIntentSenderForResult(),
+								onResult = { result ->
+									if (result.resultCode == RESULT_OK) {
+										lifecycleScope.launch {
+											val signInResult = googleAuthUiClient.signInWithIntent(
+												intent = result.data ?: return@launch
+											)
+											viewModel.onSignInResult(signInResult)
+										}
+									}
 								}
-							},
-							navController = navController
-						)
+							)
+							SignUp(
+								state = state,
+								onRegister = { navController.navigate("MoreInfo") },
+								onSignInClick = {
+									lifecycleScope.launch {
+										val signInIntentSender = googleAuthUiClient.signIn()
+										launcher.launch(
+											IntentSenderRequest.Builder(
+												signInIntentSender ?: return@launch
+											).build()
+										)
+									}
+								},
+								onLoginClick = { navController.navigate("Login") }
+							)
+						}
 
+						composable(route = "MoreInfo") {
+							MoreInfo(
+								onCompleteReg = { navController.navigate("AllSet") },
+								onBack = { navController.popBackStack() }
+							)
+						}
+
+						composable(route = "AllSet") {
+							AllSet(onDelay = {
+								navController.navigate(Destinations.Main.name) {
+									popUpTo(Destinations.Auth.name) { inclusive = true }
+								}
+							})
+						}
+
+						composable("profile") {
+							ProfileScreen(
+								userData = googleAuthUiClient.getSignedInUser(),
+								onSignOut = {
+									lifecycleScope.launch {
+										googleAuthUiClient.signOut()
+										Toast.makeText(
+											applicationContext,
+											"Signed out...👋🏾",
+											Toast.LENGTH_LONG
+										).show()
+
+										navController.popBackStack()
+									}
+								},
+								navController = navController
+
+							)
+						}
 					}
-					composable( "profile"){
-						val isProfileShown by remember { mutableStateOf(false) } // Track profile shown state
 
-//						LaunchedEffect(key1 = isProfileShown) { // Trigger after profile shown changes
-//							if (isProfileShown) {
-//								delay(5000) // Delay for 2 seconds (adjust as needed)
-//							}
-//						}
-						ProfileScreen(
-							userData = googleAuthUiClient.getSignedInUser(),
-							onSignOut = {
-								lifecycleScope.launch {
-									googleAuthUiClient.signOut()
-									Toast.makeText(
-										applicationContext,
-										"Signed out...👋🏾",
-										Toast.LENGTH_LONG
-									).show()
+					composable("camera") {
+						if (!hasRequiredPermissions()) {
+							ActivityCompat.requestPermissions(
+								this@MainActivity, CAMERAX_PERMISSIONS, 0
+							)
+						}
+						Camera()
+					}
 
-									navController.popBackStack()
-								}
-							},
-							navController = navController
-
-						)
+					composable(route = Destinations.Main.name) {
+						Main(onCamera = {
+							navController.navigate("camera")
+						})
 					}
 				}
-//				val navController = rememberNavController()
-//				NavHost(navController = navController, startDestination = Destinations.Main.name) {
-//					navigation(route = Destinations.Auth.name, startDestination = "onboard") {
-//						composable(route = "onboard") {
-//							OnBoardingScreen(
-//								onSkip = { navController.navigate("Login") }
-//							)
-//						}
-//
-//						composable(route = "Login") {
-//							LogIn(
-//								onLogin = { navController.navigate(Destinations.Main.name) },
-//								onSignup = { navController.navigate("Signup") }
-//							)
-//						}
-//
-//						composable(route = "Signup") {
-//							SignUp(
-//								onSignUp = { navController.navigate("MoreInfo") },
-//								onSignIn = { navController.navigate("Login") }
-//							)
-//						}
-//
-//						composable(route = "MoreInfo") {
-//							MoreInfo(
-//								onCompleteReg = { navController.navigate("AllSet") },
-//								onBack = { navController.popBackStack() }
-//							)
-//						}
-//
-//						composable(route = "AllSet") {
-//							AllSet(onDelay = {
-//								navController.navigate(Destinations.Main.name) {
-//									popUpTo(Destinations.Auth.name) { inclusive = true }
-//								}
-//							})
-//						}
-//					}
-//
-//					composable("camera") {
-//						if (!hasRequiredPermissions()) {
-//							ActivityCompat.requestPermissions(
-//								this@MainActivity, CAMERAX_PERMISSIONS, 0
-//							)
-//						}
-//						Camera()
-//					}
-//
-//					composable(route = Destinations.Main.name) {
-//						Main(onCamera = {
-//							navController.navigate("camera")
-//						})
-//					}
-//				}
 
 			}
 		}

@@ -9,18 +9,17 @@ import net.medinnovatelabs.applecare.firebasedata.AuthRepository
 import net.medinnovatelabs.applecare.firebasedata.AuthRepositoryImpl
 import javax.inject.Singleton
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides
-    @Singleton
-    fun providesFirebaseAuth() = FirebaseAuth.getInstance()
+	@Provides
+	@Singleton
+	fun providesFirebaseAuth() = FirebaseAuth.getInstance()
 
-    @Provides
-    @Singleton
-    fun providesRepositoryImpl(firebaseAuth: FirebaseAuth): AuthRepository{
-        return AuthRepositoryImpl(firebaseAuth)
-    }
+	@Provides
+	@Singleton
+	fun providesRepositoryImpl(firebaseAuth: FirebaseAuth): AuthRepository {
+		return AuthRepositoryImpl(firebaseAuth)
+	}
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -55,33 +56,29 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.firebasedata.SignInState
 import net.medinnovatelabs.applecare.firebasedata.SignInViewModel
-import net.medinnovatelabs.applecare.firebasedata.SignUpViewModel
 
 
 @Composable
 fun LogIn(
 	state: SignInState,
-	onSignInClick: () -> Unit,
-	navController: NavHostController,
+	onSignInWithGoogle: () -> Unit,
+	onLoginClick: () -> Unit,
+	onSignUpClick: () -> Unit,
 	viewModel: SignInViewModel = hiltViewModel()
 ) {
 	val context = LocalContext.current
 	val scope = rememberCoroutineScope()
 	val state1 = viewModel.signInState.collectAsState(initial = null)
 
-	LaunchedEffect(key1 = state.signInError){
-		state.signInError?.let {error ->
+	LaunchedEffect(key1 = state.signInError) {
+		state.signInError?.let { error ->
 			Toast.makeText(
 				context,
 				error,
@@ -90,7 +87,8 @@ fun LogIn(
 		}
 	}
 	Column(
-		horizontalAlignment = Alignment.CenterHorizontally
+		horizontalAlignment = Alignment.CenterHorizontally,
+		modifier = Modifier.fillMaxSize()
 	) {
 		Text(
 			text = "Login in to your account",
@@ -105,13 +103,12 @@ fun LogIn(
 				.padding(horizontal = 92.dp)
 		)
 
+		LogButton(onLoginClick = onLoginClick)
 
-		LogButton()
-
-		Spacer(modifier = Modifier.height(42.dp))
+		Spacer(modifier = Modifier.height(32.dp))
 
 		OutlinedButton(
-			onClick = { onSignInClick() },
+			onClick = { onSignInWithGoogle() },
 			colors = ButtonDefaults.buttonColors(
 				containerColor = Color.Transparent,
 				contentColor = Color.Unspecified
@@ -130,29 +127,150 @@ fun LogIn(
 			Text("Login with Google")
 		}
 
-		Spacer(modifier = Modifier.height(24.dp))
+		Spacer(modifier = Modifier.height(20.dp))
 
 		Row(
-			horizontalArrangement = Arrangement.Center,
+			horizontalArrangement = Arrangement.Start,
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Text(
 				"Don't have an account?",
 				fontSize = 14.sp
 			)
-			TextButton(onClick = {navController.navigate("Signup")}) {
+			TextButton(onClick = onSignUpClick) {
 				Text(
-					text = "Signup",
+					text = "Sign Up",
 					fontSize = 14.sp,
 					color = Color(0xFF5DB075)
 				)
 			}
 		}
-
-
-
 	}
 }
+
+@Composable
+fun LogButton(
+	onLoginClick: () -> Unit,
+	viewModel: SignInViewModel = hiltViewModel()
+) {
+	Column(
+		modifier = Modifier.padding(horizontal = 24.dp)
+	) {
+		var password by remember { mutableStateOf("") }
+		var email by remember { mutableStateOf("") }
+		val context = LocalContext.current
+		val scope = rememberCoroutineScope()
+		val state1 = viewModel.signInState.collectAsState(initial = null)
+		var rememberMeChecked by remember { mutableStateOf(false) }
+		var showDialog by remember { mutableStateOf(false) } // Track dialog visibility
+
+		Column(
+			verticalArrangement = Arrangement.Center,
+			horizontalAlignment = Alignment.CenterHorizontally,
+			modifier = Modifier
+				.fillMaxWidth(),
+		) {
+			EmailInputBox(email = email, onEmailChange = { email = it })
+			Spacer(modifier = Modifier.height(20.dp))
+			PasswordTextField(password = password, onPasswordChange = { password = it })
+			RememberMeCheckbox(
+				onCheckedChange = { isChecked ->
+					rememberMeChecked = isChecked
+				},
+				onForgotPasswordClick = {
+					showDialog = true
+				}
+			)
+			Spacer(modifier = Modifier.height(42.dp))
+			Button(
+				onClick = {
+					scope.launch {
+						viewModel.loginUser(email, password)
+					}
+					onLoginClick()
+				},
+				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(44.dp)
+					.background(
+						color = Color(0xFF5DB075),
+						shape = RoundedCornerShape(size = 5.dp)
+					),
+			) {
+				Text(
+					text = "Login",
+					color = Color.White,
+					fontSize = 20.sp
+				)
+			}
+			Spacer(modifier = Modifier.height(32.dp))
+			Row {
+				Box(
+					modifier = Modifier
+						.padding(vertical = 10.dp)
+						.width(136.29747.dp)
+						.height(1.dp)
+						.background(color = Color(0xFF000000))
+				)
+				Spacer(modifier = Modifier.width(15.7.dp))
+				Text(
+					text = "or",
+					style = TextStyle(
+						fontSize = 15.sp,
+						fontFamily = FontFamily(Font(R.font.inter)),
+						fontWeight = FontWeight(600),
+						color = Color(0xFF000000),
+						textAlign = TextAlign.Center,
+					), modifier = Modifier
+						.width(16.dp)
+						.height(18.dp)
+				)
+				Spacer(modifier = Modifier.width(15.7.dp))
+				Box(
+					modifier = Modifier
+						.padding(vertical = 10.dp)
+						.width(136.29747.dp)
+						.height(1.dp)
+						.background(color = Color(0xFF000000))
+				)
+			}
+			if (showDialog) {
+				ForgotPasswordDialog( // Show the dialog if visible
+					onClose = { showDialog = false }, // Hide dialog on close
+					onPasswordChanged = {},
+					onDismissRequest = { showDialog = false }, // Hide dialog on dismiss
+					onSavePassword = { newPassword, confirmPassword ->
+						// Implement password save logic here (e.g., validate and save)
+						showDialog = false // Hide dialog after save
+					}
+				)
+			}
+
+			if (state1.value?.isLoading == true) {
+				CircularProgressIndicator()
+			}
+		}
+
+		LaunchedEffect(key1 = state1.value?.isSuccess) {
+			scope.launch {
+				if (state1.value?.isSuccess?.isNotEmpty() == true) {
+					val success = state1.value?.isSuccess
+					Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
+				}
+			}
+		}
+		LaunchedEffect(key1 = state1.value?.isError) {
+			scope.launch {
+				if (state1.value?.isError?.isNotEmpty() == true) {
+					val error = state1.value?.isError
+					Toast.makeText(context, "${error}", Toast.LENGTH_LONG).show()
+				}
+			}
+		}
+	}
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -177,8 +295,7 @@ fun EmailInputBox(email: String, onEmailChange: (String) -> Unit) {
 			focusedBorderColor = Color.Black,
 			unfocusedBorderColor = Color.Black
 		),
-		modifier = Modifier.fillMaxWidth(0.9f)
-
+		modifier = Modifier.fillMaxWidth()
 	)
 }
 
@@ -205,44 +322,44 @@ fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
 		colors = TextFieldDefaults.outlinedTextFieldColors(
 			focusedBorderColor = Color.Black,
 			unfocusedBorderColor = Color.Black
-		), modifier = Modifier.fillMaxWidth(0.9f)
+		), modifier = Modifier.fillMaxWidth()
 	)
 }
-
-
 
 @Composable
 fun RememberMeCheckbox(
 	onCheckedChange: (Boolean) -> Unit,
 	onForgotPasswordClick: () -> Unit
-
 ) {
 	val (checked, setChecked) = remember { mutableStateOf(false) }
 	var showDialog by remember { mutableStateOf(false) }
 
 	Row(
-		modifier = Modifier.padding(bottom = 16.dp)
+		horizontalArrangement = Arrangement.SpaceBetween,
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(bottom = 16.dp)
 	) {
-		Checkbox(
-			checked = checked,
-			onCheckedChange = {
-				setChecked(it)
-				onCheckedChange(it)
-			},
-			colors = CheckboxDefaults.colors(
-				checkedColor = Color(
-					0xFF5DB075
+		Row {
+			Checkbox(
+				checked = checked,
+				onCheckedChange = {
+					setChecked(it)
+					onCheckedChange(it)
+				},
+				colors = CheckboxDefaults.colors(
+					checkedColor = Color(
+						0xFF5DB075
+					)
 				)
 			)
-		)
-		Text(
-			text = "Remember me",
-			fontSize = 14.sp,
-			color = Color.Black,
-			modifier = Modifier.padding(vertical = 17.dp)
-		)
-
-		Spacer(modifier = Modifier.width(84.dp)) // Spacer for alignment
+			Text(
+				text = "Remember me",
+				fontSize = 14.sp,
+				color = Color.Black,
+				modifier = Modifier.padding(vertical = 17.dp)
+			)
+		}
 
 		Text(
 			text = "Forgot password?", // Use string resource
@@ -340,130 +457,3 @@ fun ForgotPasswordDialog(
 	)
 }
 
-
-@Composable
-fun LogButton(viewModel: SignInViewModel = hiltViewModel()) {
-	Column(
-		modifier = Modifier.padding(horizontal = 24.dp)
-	) {
-		var password by remember { mutableStateOf("") }
-		var email by remember { mutableStateOf("") }
-		val context = LocalContext.current
-		val scope = rememberCoroutineScope()
-		val state1 = viewModel.signInState.collectAsState(initial = null)
-
-		Column(
-			modifier = Modifier
-				.fillMaxWidth(),
-			verticalArrangement = Arrangement.Center,
-			horizontalAlignment = Alignment.CenterHorizontally
-		) {
-			EmailInputBox(email = email, onEmailChange = { email = it })
-		}
-		Spacer(modifier = Modifier.height(20.dp))
-		Column(
-			modifier = Modifier
-				.fillMaxWidth(),
-//            .padding(16.dp),
-			verticalArrangement = Arrangement.Center,
-			horizontalAlignment = Alignment.CenterHorizontally
-		) {
-			PasswordTextField(password = password, onPasswordChange = { password = it })
-		}
-		var rememberMeChecked by remember { mutableStateOf(false) }
-		var showDialog by remember { mutableStateOf(false) } // Track dialog visibility
-
-		RememberMeCheckbox(
-			onCheckedChange = { isChecked ->
-				rememberMeChecked = isChecked
-			},
-			onForgotPasswordClick = {
-				showDialog = true // Show the forgot password dialog
-			}
-		)
-
-		if (showDialog) {
-			ForgotPasswordDialog( // Show the dialog if visible
-				onClose = { showDialog = false }, // Hide dialog on close
-				onPasswordChanged = {},
-				onDismissRequest = { showDialog = false }, // Hide dialog on dismiss
-				onSavePassword = { newPassword, confirmPassword ->
-					// Implement password save logic here (e.g., validate and save)
-					showDialog = false // Hide dialog after save
-				}
-			)
-		}
-		Spacer(modifier = Modifier.height(42.dp))
-		Button(
-			onClick = {
-					scope.launch {
-						viewModel.loginUser(email, password)
-					}
-			},
-			colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
-			modifier = Modifier
-				.fillMaxWidth()
-				.height(44.dp)
-				.background(
-					color = Color(0xFF5DB075),
-					shape = RoundedCornerShape(size = 5.dp)
-				),
-		) {
-			Text(
-				text = "Login",
-				color = Color.White,
-				fontSize = 20.sp
-			)
-		}
-		Spacer(modifier = Modifier.height(38.dp))
-		Row {
-			Box(
-				modifier = Modifier
-					.padding(vertical = 10.dp)
-					.width(136.29747.dp)
-					.height(1.dp)
-					.background(color = Color(0xFF000000))
-			)
-			Spacer(modifier = Modifier.width(15.7.dp))
-			Text(
-				text = "or",
-				style = TextStyle(
-					fontSize = 15.sp,
-					fontFamily = FontFamily(Font(R.font.inter)),
-					fontWeight = FontWeight(600),
-					color = Color(0xFF000000),
-					textAlign = TextAlign.Center,
-				), modifier = Modifier
-					.width(16.dp)
-					.height(18.dp)
-			)
-			Spacer(modifier = Modifier.width(15.7.dp))
-			Box(
-				modifier = Modifier
-					.padding(vertical = 10.dp)
-					.width(136.29747.dp)
-					.height(1.dp)
-					.background(color = Color(0xFF000000))
-			)
-		}
-		if (state1.value?.isLoading == true){
-			CircularProgressIndicator()
-		}
-		LaunchedEffect(key1 = state1.value?.isSuccess ){
-			scope.launch {
-				if (state1.value?.isSuccess?.isNotEmpty() == true){
-					val success = state1.value?.isSuccess
-					Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
-				}
-			}
-		}
-		LaunchedEffect(key1 = state1.value?.isError ){
-			scope.launch {
-				if (state1.value?.isError?.isNotEmpty() == true){
-					val error = state1.value?.isError
-					Toast.makeText(context, "${error}", Toast.LENGTH_LONG).show()
-				}
-			}
-		}
-	}
-}

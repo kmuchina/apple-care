@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.firebasedata.SignInState
@@ -64,15 +63,16 @@ import net.medinnovatelabs.applecare.firebasedata.SignUpViewModel
 fun SignUp(
 	state: SignInState,
 	onSignInClick: () -> Unit,
-	navController: NavHostController,
+	onRegister: () -> Unit,
+	onLoginClick: () -> Unit,
 	viewModel: SignUpViewModel = hiltViewModel()
 ) {
 	val state1 = viewModel.signUpState.collectAsState(initial = null)
 	val context = LocalContext.current
 	val scope = rememberCoroutineScope()
 
-	LaunchedEffect(key1 = state.signInError){
-		state.signInError?.let {error ->
+	LaunchedEffect(key1 = state.signInError) {
+		state.signInError?.let { error ->
 			Toast.makeText(
 				context,
 				error,
@@ -98,7 +98,7 @@ fun SignUp(
 		Spacer(modifier = Modifier.height(13.dp))
 		NameInputScreen()
 		Spacer(modifier = Modifier.height(27.dp))
-		RegisterButton()
+		RegisterButton(onRegister = onRegister)
 		Spacer(modifier = Modifier.height(36.dp))
 		Column(
 			modifier = Modifier.padding(horizontal = 40.dp)
@@ -128,8 +128,7 @@ fun SignUp(
 
 		}
 		Spacer(modifier = Modifier.height(27.dp))
-		SignInPrompt(navController = navController)
-
+		LoginPrompt(onLoginClick = onLoginClick)
 	}
 }
 
@@ -282,6 +281,7 @@ fun ConfirmPasswordTextField(
 
 @Composable
 fun RegisterButton(
+	onRegister: () -> Unit,
 	viewModel: SignUpViewModel = hiltViewModel()
 ) {
 	val scope = rememberCoroutineScope()
@@ -325,9 +325,9 @@ fun RegisterButton(
 	) {
 		Button(
 			onClick = {
-			  scope.launch {
-				  viewModel.registerUser(email, password)
-			  }
+				scope.launch {
+					viewModel.registerUser(email, password)
+				}
 			},
 			colors = ButtonDefaults.buttonColors(
 				containerColor = Color(0xFF5DB075)
@@ -372,20 +372,21 @@ fun RegisterButton(
 					.background(color = Color(0xFF000000))
 			)
 			val context = LocalContext.current
-			if (state1.value?.isLoading == true){
+			if (state1.value?.isLoading == true) {
 				CircularProgressIndicator()
 			}
-			LaunchedEffect(key1 = state1.value?.isSuccess ){
+			LaunchedEffect(key1 = state1.value?.isSuccess) {
 				scope.launch {
-					if (state1.value?.isSuccess?.isNotEmpty() == true){
+					if (state1.value?.isSuccess?.isNotEmpty() == true) {
 						val success = state1.value?.isSuccess
 						Toast.makeText(context, "${success}", Toast.LENGTH_LONG).show()
+						onRegister()
 					}
 				}
 			}
-			LaunchedEffect(key1 = state1.value?.isError ){
+			LaunchedEffect(key1 = state1.value?.isError) {
 				scope.launch {
-					if (state1.value?.isError?.isNotEmpty() == true){
+					if (state1.value?.isError?.isNotEmpty() == true) {
 						val error = state1.value?.isError
 						Toast.makeText(context, "${error}", Toast.LENGTH_LONG).show()
 					}
@@ -408,8 +409,8 @@ fun Google1LogIn() {
 }
 
 @Composable
-fun SignInPrompt(
-	navController: NavHostController
+fun LoginPrompt(
+	onLoginClick: () -> Unit
 ) {
 	Row(
 		horizontalArrangement = Arrangement.Center,
@@ -424,9 +425,9 @@ fun SignInPrompt(
 			modifier = Modifier.padding(end = 4.dp)
 		)
 		Text(
-			text = "Sign In",
+			text = "Login",
 			color = Color(0xFF5DB075),
-			modifier = Modifier.clickable { navController.navigate("Login") }
+			modifier = Modifier.clickable { onLoginClick() }
 		)
 	}
 }

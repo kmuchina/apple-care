@@ -58,9 +58,11 @@ dependencies {
 	// Add the dependency for the Google Play services library
 	implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+	// navigation
 	implementation(libs.androidx.navigation.fragment.ktx)
 	implementation(libs.androidx.navigation.ui.ktx)
 	implementation(libs.navigation.compose)
+
 	//Camera
 	implementation("androidx.camera:camera-camera2:1.3.2")
 	implementation("androidx.camera:camera-core:1.3.1")
@@ -87,8 +89,8 @@ dependencies {
 	implementation("com.airbnb.android:lottie-compose:6.0.0")
 	implementation("androidx.core:core-splashscreen:1.0.1")
 	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-	implementation ("io.insert-koin:koin-core:3.2.0")// or latest version
-	implementation ("io.insert-koin:koin-android:3.2.0")
+	implementation("io.insert-koin:koin-core:3.2.0")// or latest version
+	implementation("io.insert-koin:koin-android:3.2.0")
 
 //	implementation(libs.firebase.auth)
 	implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
@@ -101,7 +103,7 @@ dependencies {
 	implementation(libs.firebase.auth.ktx)
 	implementation(libs.firebase.auth)
 	implementation(libs.androidx.lifecycle.runtime.compose)
-	kapt ("com.google.dagger:hilt-android-compiler:2.48")
+	kapt("com.google.dagger:hilt-android-compiler:2.48")
 
 	implementation("androidx.hilt:hilt-work:1.2.0")
 	kapt("androidx.hilt:hilt-compiler:1.2.0")
@@ -113,7 +115,7 @@ dependencies {
 	androidTestImplementation(platform(libs.androidx.compose.bom))
 	implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
 	implementation("androidx.compose.material:material-icons-extended:1.5.4")
-	implementation ("androidx.compose.material:material:1.6.2")
+	implementation("androidx.compose.material:material:1.6.2")
 	implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
 	implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
 
