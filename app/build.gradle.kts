@@ -71,8 +71,6 @@ dependencies {
 	implementation("androidx.camera:camera-extensions:1.3.1")
 	implementation("io.github.microutils:kotlin-logging:2.0.6")
 
-
-
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
 	implementation(libs.androidx.activity.compose)
@@ -98,6 +96,7 @@ dependencies {
 	implementation(libs.tensorflow.lite.support)
 	implementation(libs.tensorflow.lite.metadata)
 	implementation(libs.tensorflow.lite.gpu)
+<<<<<<< HEAD
 	//Dagger - Hilt
 	implementation("com.google.dagger:hilt-android:2.48")
 	implementation(libs.firebase.auth.ktx)
@@ -109,6 +108,9 @@ dependencies {
 	kapt("androidx.hilt:hilt-compiler:1.2.0")
 	implementation("androidx.work:work-runtime-ktx:2.8.1")
 	implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+=======
+	implementation(libs.play.services.location)
+>>>>>>> ft-home
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)

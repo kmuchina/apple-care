@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -26,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.medinnovatelabs.applecare.R
@@ -34,17 +37,17 @@ import net.medinnovatelabs.applecare.R
 fun OnBoardingScreen(
 	onSkip: () -> Unit
 ) {
-	var result = remember { mutableIntStateOf(1) }
+	var result = remember { mutableIntStateOf(0) }
 
 	val imageResource = when (result.intValue) {
-		1 -> R.drawable.onboarding_vector_1
-		2 -> R.drawable.onboarding_vector_2
+		0 -> R.drawable.onboarding_vector_1
+		1 -> R.drawable.onboarding_vector_2
 		else -> R.drawable.onboarding_vector_3
 	}
 
 	val textResource: String = when (result.intValue) {
-		1 -> stringResource(R.string.onboarding_text_1)
-		2 -> stringResource(R.string.onboarding_text_2)
+		0 -> stringResource(R.string.onboarding_text_1)
+		1 -> stringResource(R.string.onboarding_text_2)
 		else -> stringResource(R.string.onboarding_text_3)
 	}
 	Column(
@@ -82,7 +85,7 @@ fun OnBoardingScreen(
 		) {
 			Button(
 				onClick = {
-					if (result.value < 3) result.value++
+					if (result.intValue < 2) result.intValue++
 					else onSkip()
 				},
 				colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5DB075)),
@@ -90,7 +93,7 @@ fun OnBoardingScreen(
 					.width(184.dp)
 					.height(36.dp)
 			) {
-				if (result.value > 2) {
+				if (result.intValue == 2) {
 					Text(
 						text = "Get Started"
 					)
@@ -114,42 +117,30 @@ fun OnBoardingScreen(
 
 		Spacer(Modifier.height(48.dp))
 
-		Row {
-			if (result.value == 1) {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0xFF5DB075))
-				})
-			} else {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0x405DB075))
-				})
-			}
-
-			Spacer(modifier = Modifier.width(8.dp))
-
-			if (result.value == 2) {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0xFF5DB075))
-				})
-			} else {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0x405DB075))
-				})
-			}
-
-			Spacer(modifier = Modifier.width(8.dp))
-
-			if (result.value > 2) {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0xFF5DB075))
-				})
-			} else {
-				Canvas(modifier = Modifier.size(8.dp), onDraw = {
-					drawCircle(color = Color(0x405DB075))
-				})
+		Row(
+			verticalAlignment = Alignment.Bottom,
+			modifier = Modifier
+				.fillMaxWidth(),
+			horizontalArrangement = Arrangement.Center
+		) {
+			repeat(3) { iteration ->
+				val color = if (result.intValue == iteration) Color(0xFF5DB075)
+				else Color(0x405DB075)
+				Canvas(
+					modifier = Modifier
+						.padding(horizontal = 4.dp)
+						.size(8.dp),
+					onDraw = {
+						drawCircle(color = color)
+					}
+				)
 			}
 		}
-
-
 	}
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun OnBoardScreenPreview() {
+	OnBoardingScreen(onSkip = { })
 }

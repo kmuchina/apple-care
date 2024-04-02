@@ -1,7 +1,10 @@
 package net.medinnovatelabs.applecare
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -25,6 +28,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.compose.AppleCareTheme
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.firebasedata.GoogleAuthUiClient
@@ -47,11 +52,16 @@ class MainActivity : ComponentActivity() {
 			oneTapClient = Identity.getSignInClient(applicationContext)
 		)
 	}
+	lateinit var fusedLocationClient: FusedLocationProviderClient
+	private var location: Location? = null
 
 	@OptIn(ExperimentalMaterial3Api::class)
 	@RequiresApi(Build.VERSION_CODES.R)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+		getLocation()
+
 		setContent {
 			AppleCareTheme {
 				val navController = rememberNavController()
@@ -189,16 +199,23 @@ class MainActivity : ComponentActivity() {
 					composable("camera") {
 						if (!hasRequiredPermissions()) {
 							ActivityCompat.requestPermissions(
-								this@MainActivity, CAMERAX_PERMISSIONS, 0
+								this@MainActivity, PERMISSIONS, 0
 							)
 						}
 						Camera()
 					}
 
 					composable(route = Destinations.Main.name) {
-						Main(onCamera = {
-							navController.navigate("camera")
-						})
+
+						val gmmIntentUri = Uri.parse("geo:0,0?z=15&q=agrovet+near+me")
+						val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+						mapIntent.setPackage("com.google.android.apps.maps")
+
+						Main(
+							location = getLocationName(location),
+							onFindAgro = { startActivity(mapIntent) },
+							onCamera = { navController.navigate("camera") }
+						)
 					}
 				}
 
@@ -208,7 +225,7 @@ class MainActivity : ComponentActivity() {
 	}
 
 	private fun hasRequiredPermissions(): Boolean {
-		return CAMERAX_PERMISSIONS.all { permission: String ->
+		return PERMISSIONS.all { permission: String ->
 			ContextCompat.checkSelfPermission(
 				applicationContext,
 				permission
@@ -216,9 +233,39 @@ class MainActivity : ComponentActivity() {
 		}
 	}
 
+	private fun getLocation() {
+		if (ActivityCompat.checkSelfPermission(
+				this,
+				Manifest.permission.ACCESS_FINE_LOCATION
+			) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+				this,
+				Manifest.permission.ACCESS_COARSE_LOCATION
+			) != PackageManager.PERMISSION_GRANTED
+		) {
+			ActivityCompat.requestPermissions(
+				this@MainActivity, PERMISSIONS, 0
+			)
+		}
+		fusedLocationClient.lastLocation
+			.addOnSuccessListener { it ->
+				it?.let {
+					location = it
+				}
+			}
+			.addOnFailureListener { exception ->
+			}
+
+	}
+
+	private fun getLocationName(location: Location?): String {
+		return location?.toString() ?: "Unknown Location"
+	}
+
 	companion object {
-		val CAMERAX_PERMISSIONS = arrayOf(
-			Manifest.permission.CAMERA
+		val PERMISSIONS = arrayOf(
+			Manifest.permission.CAMERA,
+			Manifest.permission.ACCESS_COARSE_LOCATION,
+			Manifest.permission.ACCESS_FINE_LOCATION
 		)
 	}
 
