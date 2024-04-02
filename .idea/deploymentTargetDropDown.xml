@@ -2,16 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-<<<<<<< HEAD
-      <entry key="MainActivity">
-=======
-      <entry key="HomePreview">
-        <State />
-      </entry>
-      <entry key="MainPreview">
->>>>>>> ft-home
-        <State />
-      </entry>
       <entry key="app">
         <State />
       </entry>
