@@ -106,8 +106,8 @@ fun SignUp(
 			OutlinedButton(
 				onClick = { onSignInClick() },
 				colors = ButtonDefaults.buttonColors(
-					containerColor = Color.Transparent,
-					contentColor = Color.Unspecified
+					containerColor = MaterialTheme.colorScheme.background,
+					contentColor = MaterialTheme.colorScheme.onBackground
 				),
 				modifier = Modifier
 					.width(320.dp)

@@ -155,8 +155,9 @@ class MainActivity : ComponentActivity() {
 											).build()
 										)
 									}
+									navController.navigate("MoreInfo")
 								},
-								onLoginClick = { navController.navigate("Login") }
+								onLoginClick = { navController.navigate("MoreInfo") }
 							)
 						}
 
