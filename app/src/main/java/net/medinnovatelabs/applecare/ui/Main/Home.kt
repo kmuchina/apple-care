@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,10 +22,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -93,7 +89,7 @@ fun HomeTopAppBar(
 			navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
 		),
 		actions = {
-			BadgedBox(
+			/*BadgedBox(
 				badge = {
 					Badge(
 						modifier = Modifier
@@ -104,7 +100,7 @@ fun HomeTopAppBar(
 				},
 
 				) {
-				IconButton(onClick = { /*TODO*/ }) {
+				IconButton(onClick = { *//*TODO*//* }) {
 					Icon(
 						Icons.Outlined.Notifications,
 						contentDescription = "Notifications",
@@ -112,7 +108,7 @@ fun HomeTopAppBar(
 						modifier = Modifier.size(20.dp)
 					)
 				}
-			}
+			}*/
 
 			IconButton(onClick = { /*TODO*/ }) {
 				Icon(
@@ -302,7 +298,11 @@ fun AgroVetNearMe(modifier: Modifier = Modifier, onFindAgro: () -> Unit) {
 				.fillMaxHeight()
 				.fillMaxWidth()
 				.padding(top = 4.dp)
-				.border(width = 2.dp, color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(10.dp))
+				.border(
+					width = 2.dp,
+					color = MaterialTheme.colorScheme.primaryContainer,
+					shape = RoundedCornerShape(10.dp)
+				)
 		) {
 			Row(
 				horizontalArrangement = Arrangement.SpaceBetween

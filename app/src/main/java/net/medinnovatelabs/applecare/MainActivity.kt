@@ -155,8 +155,9 @@ class MainActivity : ComponentActivity() {
 											).build()
 										)
 									}
+									navController.navigate("MoreInfo")
 								},
-								onLoginClick = { navController.navigate("Login") }
+								onLoginClick = { navController.navigate("MoreInfo") }
 							)
 						}
 
@@ -213,8 +214,22 @@ class MainActivity : ComponentActivity() {
 
 						Main(
 							location = getLocationName(location),
+							userData = googleAuthUiClient.getSignedInUser(),
 							onFindAgro = { startActivity(mapIntent) },
-							onCamera = { navController.navigate("camera") }
+							onCamera = { navController.navigate("camera") },
+							onLogOut = {
+								lifecycleScope.launch {
+									googleAuthUiClient.signOut()
+									Toast.makeText(
+										applicationContext,
+										"Signed out...👋🏾",
+										Toast.LENGTH_LONG
+									).show()
+									navController.navigate(Destinations.Auth.name) {
+										popUpTo(Destinations.Auth.name) { inclusive = true }
+									}
+								}
+							}
 						)
 					}
 				}

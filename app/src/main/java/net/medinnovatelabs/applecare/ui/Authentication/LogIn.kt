@@ -109,10 +109,6 @@ fun LogIn(
 
 		OutlinedButton(
 			onClick = { onSignInWithGoogle() },
-			colors = ButtonDefaults.buttonColors(
-				containerColor = Color.Transparent,
-				contentColor = Color.Unspecified
-			),
 			modifier = Modifier
 				.width(320.dp)
 				.height(40.dp)
