@@ -24,13 +24,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -84,20 +83,16 @@ fun Profile(
 			OutlinedTextField(
 				value = userData?.username ?: "John Doe",
 				onValueChange = { },
-				label = { },
-				textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
 				shape = RoundedCornerShape(8.dp),
 				leadingIcon = {
 					Icon(
 						imageVector = Icons.Outlined.Person,
-						contentDescription = "Person Icon",
-						tint = Color(0xFF5DB075)
+						contentDescription = "Person"
 					)
 				},
 				keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-				colors = TextFieldDefaults.outlinedTextFieldColors(
-					focusedBorderColor = Color.Black,
-					unfocusedBorderColor = Color.Black
+				colors = OutlinedTextFieldDefaults.colors(
+					unfocusedLeadingIconColor = MaterialTheme.colorScheme.primary,
 				),
 				modifier = Modifier.fillMaxWidth()
 			)
@@ -111,20 +106,16 @@ fun Profile(
 			OutlinedTextField(
 				value = "johndoe@example.com",
 				onValueChange = { },
-				label = { },
-				textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
 				shape = RoundedCornerShape(8.dp),
 				leadingIcon = {
 					Icon(
 						imageVector = Icons.Outlined.Email,
-						contentDescription = "Person Icon",
-						tint = Color(0xFF5DB075)
+						contentDescription = "Email"
 					)
 				},
 				keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-				colors = TextFieldDefaults.outlinedTextFieldColors(
-					focusedBorderColor = Color.Black,
-					unfocusedBorderColor = Color.Black
+				colors = OutlinedTextFieldDefaults.colors(
+					unfocusedLeadingIconColor = MaterialTheme.colorScheme.primary,
 				),
 				modifier = Modifier.fillMaxWidth()
 			)
@@ -137,22 +128,18 @@ fun Profile(
 		) {
 			Text("Phone Number")
 			OutlinedTextField(
-				value = "0712345678",
+				value = "07123456",
 				onValueChange = { },
-				label = { },
-				textStyle = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
 				shape = RoundedCornerShape(8.dp),
 				leadingIcon = {
 					Icon(
 						imageVector = Icons.Outlined.Phone,
-						contentDescription = "Person Icon",
-						tint = Color(0xFF5DB075)
+						contentDescription = "Phone Number"
 					)
 				},
 				keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-				colors = TextFieldDefaults.outlinedTextFieldColors(
-					focusedBorderColor = Color.Black,
-					unfocusedBorderColor = Color.Black
+				colors = OutlinedTextFieldDefaults.colors(
+					unfocusedLeadingIconColor = MaterialTheme.colorScheme.primary,
 				),
 				modifier = Modifier.fillMaxWidth()
 			)
@@ -163,7 +150,7 @@ fun Profile(
 		Row(
 			horizontalArrangement = Arrangement.SpaceEvenly,
 			modifier = Modifier.fillMaxWidth()
-		){
+		) {
 			// Profile Sign Out Button
 			Button(
 				onClick = onLogOut,
