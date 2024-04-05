@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui.Authentication
+package net.medinnovatelabs.applecare.ui.authentication
 
 import android.widget.Toast
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui.Main
+package net.medinnovatelabs.applecare.ui.main
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -78,7 +78,7 @@ fun HomeTopAppBar(
 		},
 		title = {
 			Text(
-				stringResource(id = R.string.home),
+				stringResource(id = R.string.brand),
 				style = MaterialTheme.typography.titleMedium,
 				color = MaterialTheme.colorScheme.onPrimary
 			)

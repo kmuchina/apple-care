@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui.Main
+package net.medinnovatelabs.applecare.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

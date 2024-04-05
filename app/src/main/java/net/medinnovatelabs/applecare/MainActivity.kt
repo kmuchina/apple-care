@@ -3,6 +3,7 @@ package net.medinnovatelabs.applecare
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.Build
@@ -16,8 +17,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,15 +37,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.firebasedata.GoogleAuthUiClient
 import net.medinnovatelabs.applecare.firebasedata.SignInViewModel
-import net.medinnovatelabs.applecare.profile.ProfileScreen
-import net.medinnovatelabs.applecare.ui.Authentication.AllSet
-import net.medinnovatelabs.applecare.ui.Authentication.LogIn
-import net.medinnovatelabs.applecare.ui.Authentication.MoreInfo
-import net.medinnovatelabs.applecare.ui.Authentication.OnBoardingScreen
-import net.medinnovatelabs.applecare.ui.Authentication.SignUp
 import net.medinnovatelabs.applecare.ui.Camera.Camera
 import net.medinnovatelabs.applecare.ui.Destinations
-import net.medinnovatelabs.applecare.ui.Main.Main
+import net.medinnovatelabs.applecare.ui.authentication.AllSet
+import net.medinnovatelabs.applecare.ui.authentication.LogIn
+import net.medinnovatelabs.applecare.ui.authentication.MoreInfo
+import net.medinnovatelabs.applecare.ui.authentication.OnBoardingScreen
+import net.medinnovatelabs.applecare.ui.authentication.SignUp
+import net.medinnovatelabs.applecare.ui.main.Main
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -175,26 +178,6 @@ class MainActivity : ComponentActivity() {
 								}
 							})
 						}
-
-						composable("profile") {
-							ProfileScreen(
-								userData = googleAuthUiClient.getSignedInUser(),
-								onSignOut = {
-									lifecycleScope.launch {
-										googleAuthUiClient.signOut()
-										Toast.makeText(
-											applicationContext,
-											"Signed out...👋🏾",
-											Toast.LENGTH_LONG
-										).show()
-
-										navController.popBackStack()
-									}
-								},
-								navController = navController
-
-							)
-						}
 					}
 
 					composable("camera") {
@@ -271,9 +254,18 @@ class MainActivity : ComponentActivity() {
 			}
 
 	}
-
+	
+	@Composable
 	private fun getLocationName(location: Location?): String {
-		return location?.toString() ?: "Unknown Location"
+		val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
+		var name: String = "Unknown Location"
+		/*location?.let { loc ->
+			geocoder.getFromLocation(loc.latitude, loc.longitude, 1) {
+				name = it[0].countryName
+			}
+		}*/
+
+		return name
 	}
 
 	companion object {

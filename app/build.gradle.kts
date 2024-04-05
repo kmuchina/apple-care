@@ -2,8 +2,8 @@ plugins {
 	alias(libs.plugins.androidApplication)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
 	id("com.google.gms.google-services")
-	id("kotlin-kapt")
 	id("dagger.hilt.android.plugin")
+	id("com.google.devtools.ksp")
 }
 
 android {
@@ -79,19 +79,16 @@ dependencies {
 	implementation(libs.androidx.ui)
 	implementation(libs.androidx.ui.graphics)
 	implementation(libs.androidx.ui.tooling.preview)
-	//	implementation(libs.androidx.material3)
 	implementation("androidx.compose.material3:material3")
 	implementation("io.coil-kt:coil-compose:2.6.0")
 	implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
 
-	//Lottie
-	implementation("com.airbnb.android:lottie-compose:6.0.0")
-	implementation("androidx.core:core-splashscreen:1.0.1")
-	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-	implementation("io.insert-koin:koin-core:3.2.0")// or latest version
-	implementation("io.insert-koin:koin-android:3.2.0")
+	// Room
+	implementation(libs.room.runtime)
+	implementation(libs.room.ktx)
+	implementation(libs.firebase.crashlytics.buildtools)
+	ksp(libs.room.compiler)
 
-//	implementation(libs.firebase.auth)
 	implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
 	implementation("com.google.firebase:firebase-analytics")
 	implementation(libs.tensorflow.lite.support)
@@ -102,27 +99,24 @@ dependencies {
 	implementation(libs.firebase.auth.ktx)
 	implementation(libs.firebase.auth)
 	implementation(libs.androidx.lifecycle.runtime.compose)
-	kapt("com.google.dagger:hilt-android-compiler:2.48")
+	ksp("com.google.dagger:hilt-android-compiler:2.48")
 
 	implementation("androidx.hilt:hilt-work:1.2.0")
-	kapt("androidx.hilt:hilt-compiler:1.2.0")
+	ksp("androidx.hilt:hilt-compiler:1.2.0")
 	implementation("androidx.work:work-runtime-ktx:2.8.1")
 	implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
-	testImplementation(libs.junit)
-	androidTestImplementation(libs.androidx.junit)
-	androidTestImplementation(libs.androidx.espresso.core)
-	androidTestImplementation(platform(libs.androidx.compose.bom))
-	implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
 	implementation("androidx.compose.material:material-icons-extended:1.5.4")
 	implementation("androidx.compose.material:material:1.6.2")
 	implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
 	implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
 
+	testImplementation(libs.junit)
+	androidTestImplementation(libs.androidx.junit)
+	androidTestImplementation(libs.androidx.espresso.core)
+	androidTestImplementation(platform(libs.androidx.compose.bom))
+
 	androidTestImplementation(libs.androidx.ui.test.junit4)
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
-}
-kapt {
-	correctErrorTypes = true
 }

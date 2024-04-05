@@ -1,6 +1,7 @@
-package net.medinnovatelabs.applecare.ui.Main
+package net.medinnovatelabs.applecare.ui.main
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -239,11 +242,15 @@ fun Main(
 					Home(location = location, onFindAgro = onFindAgro)
 				}
 				composable(MainDestinations.History.name) {
-					Text("History")
+					History()
 				}
 
 				composable(MainDestinations.Community.name) {
-					Text("Community")
+					Image(
+						painterResource(R.drawable.pic_wip),
+						"Work In Progress",
+						modifier = Modifier.fillMaxSize()
+					)
 				}
 				composable(MainDestinations.Profile.name) {
 					Profile(userData = userData, onLogOut = onLogOut)
@@ -470,13 +477,21 @@ fun BottomNavigationBar(
 				}
 			},
 			icon = {
-				Icon(
-					if (currentScreen.name == stringResource(id = R.string.community)) painterResource(
-						id = R.drawable.ic_community_selected
+				BadgedBox(
+					badge = {
+						Badge {
+							Text("WIP")
+						}
+					}
+				) {
+					Icon(
+						if (currentScreen.name == stringResource(id = R.string.community)) painterResource(
+							id = R.drawable.ic_community_selected
+						)
+						else painterResource(id = R.drawable.ic_community_unselected),
+							contentDescription = stringResource(id = R.string.community)
 					)
-					else painterResource(id = R.drawable.ic_community_unselected),
-					contentDescription = stringResource(id = R.string.community)
-				)
+				}
 			},
 			label = {
 				Text(

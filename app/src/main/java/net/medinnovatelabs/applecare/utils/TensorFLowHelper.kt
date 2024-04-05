@@ -1,9 +1,10 @@
-package net.medinnovatelabs.applecare
+package net.medinnovatelabs.applecare.utils
 
+import android.content.Context
 import android.graphics.Bitmap
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import net.medinnovatelabs.applecare.data.models.ClassifiedImage
 import net.medinnovatelabs.applecare.ml.Apple
+import net.medinnovatelabs.applecare.utils.BitmapConverter.convertBitmapToString
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.nio.ByteBuffer
@@ -13,13 +14,16 @@ object TensorFLowHelper {
 
 	const val IMAGESIZE = 128
 
-	@Composable
-	fun ClassifyImage(image: Bitmap, callback: (@Composable (fruit: String) -> Unit)) {
+	fun classifyImage(
+		image: Bitmap,
+		context: Context,
+		callback: ((classifiedImage: ClassifiedImage) -> Unit)
+	) {
 		// Load the TFLite model.
-		val model: Apple = Apple.newInstance(LocalContext.current)
+		val model: Apple = Apple.newInstance(context)
 
 		// Creates inputs for reference.
-		val inputFeature0 =
+		val inputFeature0: TensorBuffer =
 			TensorBuffer.createFixedSize(intArrayOf(1, IMAGESIZE, IMAGESIZE, 3), DataType.FLOAT32)
 
 		val byteBuffer: ByteBuffer = ByteBuffer.allocateDirect(4 * IMAGESIZE * IMAGESIZE * 3)
@@ -59,7 +63,13 @@ object TensorFLowHelper {
 		val classes =
 			arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Healthy Apple Leaf")
 
-		callback.invoke(classes[maxPos])
+		val classifiedImage = ClassifiedImage(
+			name = convertBitmapToString(image),
+			label = classes[maxPos],
+			confidence = maxConfidence
+		)
+
+		callback.invoke(classifiedImage)
 
 		// Releases model resources if no longer used.
 		model.close()

@@ -18,11 +18,15 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,9 +37,11 @@ import androidx.compose.material.icons.outlined.Cameraswitch
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,19 +51,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
+import net.medinnovatelabs.applecare.data.models.ClassifiedImage
+import net.medinnovatelabs.applecare.utils.TensorFLowHelper
 import java.io.File
 import java.io.InputStream
 
 @ExperimentalMaterial3Api
-@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun Camera() {
+fun Camera(
+	viewModel: CameraViewModel = hiltViewModel()
+) {
 	val context = LocalContext.current
 	val controller = remember {
 		LifecycleCameraController(context).apply {
@@ -69,7 +82,6 @@ fun Camera() {
 	}
 	val scaffoldState = rememberBottomSheetScaffoldState()
 	val scope = rememberCoroutineScope()
-	val viewModel = viewModel<MainViewModel>()
 	val bitmap by viewModel.bitmaps.collectAsState()
 	val sheetPeekHeight by viewModel.sheetPeekHeight.collectAsState()
 
@@ -82,7 +94,18 @@ fun Camera() {
 				val selectedBitmap = selectedUri.toBitmap(context.contentResolver)
 				selectedBitmap?.let { bitmap ->
 					// Use viewModel.onTakePhoto(bitmap) to handle the selected image
-					viewModel.onTakePhoto(bitmap)
+					// viewModel.onTakePhoto(bitmap)
+					val scaledBitmap = Bitmap.createScaledBitmap(
+						selectedBitmap,
+						TensorFLowHelper.IMAGESIZE,
+						TensorFLowHelper.IMAGESIZE, false
+					);
+
+					TensorFLowHelper.classifyImage(scaledBitmap, context) {
+						scope.launch {
+							viewModel.onTakePhoto(it)
+						}
+					}
 				}
 			}
 		}
@@ -92,14 +115,10 @@ fun Camera() {
 		scaffoldState = scaffoldState,
 		sheetPeekHeight = sheetPeekHeight.dp,
 		sheetContent = {
-			// PhotoBottomSheetContent( bitmaps = bitmaps, modifier = Modifier.fillMaxWidth())
 			bitmap?.let {
-				PhotoBottomSheetContent(
-					bitmap = it,
-					onDismiss = {
-						viewModel.onTakePhoto(null)
-					}
-				)
+				PhotoBottomSheetContent(bitmap = it, label = viewModel.label.value) {
+					viewModel.reset()
+				}
 			}
 		}
 	) { padding ->
@@ -208,7 +227,11 @@ fun Camera() {
 								takePhoto(
 									controller = controller,
 									context = context,
-									onPhotoTaken = viewModel::onTakePhoto
+									onPhotoTaken = {
+										scope.launch {
+											viewModel.onTakePhoto(it)
+										}
+									}
 								)
 							}
 						)
@@ -218,7 +241,11 @@ fun Camera() {
 							takePhoto(
 								controller = controller,
 								context = context,
-								onPhotoTaken = viewModel::onTakePhoto
+								onPhotoTaken = {
+									scope.launch {
+										viewModel.onTakePhoto(it)
+									}
+								}
 							)
 						}
 					) {
@@ -234,17 +261,71 @@ fun Camera() {
 	}
 }
 
+@Composable
+fun CameraPreview(
+	controller: LifecycleCameraController,
+	modifier: Modifier = Modifier
+) {
+	val lifecycleOwner = LocalLifecycleOwner.current
+	AndroidView(
+		factory = {
+			PreviewView(it).apply {
+				this.controller = controller
+				controller.bindToLifecycle(lifecycleOwner)
+			}
+		},
+		modifier = modifier
+	)
+}
+
+
+@Composable
+fun PhotoBottomSheetContent(
+	bitmap: Bitmap,
+	label: String,
+	onDismiss: () -> Unit
+) {
+	Column(
+		modifier = Modifier.fillMaxWidth(),
+		verticalArrangement = Arrangement.Center,
+		horizontalAlignment = Alignment.CenterHorizontally
+	) {
+		Image(
+			bitmap = bitmap.asImageBitmap(),
+			contentDescription = "Classified Image",
+			Modifier.size(300.dp)
+		)
+		Spacer(modifier = Modifier.padding(8.dp))
+
+		Column(
+			modifier = Modifier.fillMaxWidth(),
+			verticalArrangement = Arrangement.Center,
+			horizontalAlignment = Alignment.CenterHorizontally
+		) {
+			Text(text = "Image is classified as:")
+			Text(text = label, fontSize = 20.sp)
+		}
+
+		Spacer(modifier = Modifier.padding(8.dp))
+
+		Button(onClick = onDismiss) {
+			Text("Dismiss")
+		}
+	}
+}
+
 
 private fun takePhoto(
 	controller: LifecycleCameraController,
 	context: Context,
-	onPhotoTaken: (Bitmap) -> Unit
+	onPhotoTaken: (ClassifiedImage) -> Unit
 ) {
 	val cameraSelector = CameraSelector.Builder().build()
 
 	controller.takePicture(
 		ContextCompat.getMainExecutor(context),
 		object : ImageCapture.OnImageCapturedCallback() {
+
 			override fun onCaptureSuccess(image: ImageProxy) {
 				super.onCaptureSuccess(image)
 
@@ -260,7 +341,15 @@ private fun takePhoto(
 				Toast.makeText(context, "Photo captured successfully...🍏...🎉🎉", Toast.LENGTH_SHORT)
 					.show()
 
-				onPhotoTaken(rotatedBitmap)
+				val scaledBitmap = Bitmap.createScaledBitmap(
+					rotatedBitmap,
+					TensorFLowHelper.IMAGESIZE,
+					TensorFLowHelper.IMAGESIZE, false
+				);
+
+				TensorFLowHelper.classifyImage(scaledBitmap, context) {
+					onPhotoTaken(it)
+				}
 			}
 
 			override fun onError(exception: ImageCaptureException) {
@@ -322,6 +411,3 @@ private fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
 		inputStream?.close()
 	}
 }
-
-
-private const val galleryRequestCode = 100
