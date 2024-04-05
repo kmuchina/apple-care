@@ -3,7 +3,7 @@ package net.medinnovatelabs.applecare.utils
 import android.content.Context
 import android.graphics.Bitmap
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
-import net.medinnovatelabs.applecare.ml.Apple
+import net.medinnovatelabs.applecare.ml.AppleV2
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertBitmapToString
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -20,7 +20,7 @@ object TensorFLowHelper {
 		callback: ((classifiedImage: ClassifiedImage) -> Unit)
 	) {
 		// Load the TFLite model.
-		val model: Apple = Apple.newInstance(context)
+		val model = AppleV2.newInstance(context)
 
 		// Creates inputs for reference.
 		val inputFeature0: TensorBuffer =
@@ -46,7 +46,7 @@ object TensorFLowHelper {
 		inputFeature0.loadBuffer(byteBuffer)
 
 		// Runs model inference and gets result.
-		val outputs: Apple.Outputs = model.process(inputFeature0)
+		val outputs = model.process(inputFeature0)
 		val outputFeature0: TensorBuffer = outputs.getOutputFeature0AsTensorBuffer()
 		val confidences = outputFeature0.floatArray
 
@@ -60,12 +60,13 @@ object TensorFLowHelper {
 			}
 		}
 
-		val classes =
-			arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Healthy Apple Leaf")
+		val classLabels =
+			arrayOf("Apple Black Rot", "Apple Cedar Rust", "Healthy Apple", "Apple Scab")
+		// arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Healthy Apple Leaf")
 
 		val classifiedImage = ClassifiedImage(
 			name = convertBitmapToString(image),
-			label = classes[maxPos],
+			label = classLabels[maxPos],
 			confidence = maxConfidence
 		)
 
