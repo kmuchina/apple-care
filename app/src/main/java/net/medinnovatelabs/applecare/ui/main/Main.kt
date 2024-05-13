@@ -96,6 +96,7 @@ fun Main(
 	val currentScreen = MainDestinations.valueOf(
 		backStackEntry?.destination?.route ?: MainDestinations.Home.name
 	)
+
 	val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 	val scope = rememberCoroutineScope()
 	var selectedIndex by rememberSaveable {
@@ -112,7 +113,7 @@ fun Main(
 				onProfileClick = { navController.navigate("profile") }
 			)
 		},
-		drawerState = drawerState
+		drawerState = drawerState,
 	) {
 		Scaffold(
 			topBar = {
@@ -268,10 +269,7 @@ fun DrawerContent(
 	onLogOut: () -> Unit,
 	onProfileClick: () -> Unit
 ) {
-	ModalDrawerSheet(
-		modifier = Modifier
-			.fillMaxSize()
-	) {
+	ModalDrawerSheet {
 		Row(
 			horizontalArrangement = Arrangement.SpaceBetween,
 			verticalAlignment = Alignment.CenterVertically,
@@ -294,10 +292,11 @@ fun DrawerContent(
 			}
 			Icon(
 				painter = painterResource(id = R.drawable.logo),
-				contentDescription = "Leaflens Logo",
+				contentDescription = "Apple Care Logo",
 			)
 			Text("")
 		}
+
 		HorizontalDivider()
 
 		Column(
