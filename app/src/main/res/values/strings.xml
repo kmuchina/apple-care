@@ -20,6 +20,9 @@
     <string name="temp">%d\u2103</string>
     <string name="web_client_id">466825647552-t2msg1jk7ck1gr87g9tls2ptfiii7aq8.apps.googleusercontent.com</string>
     <string name="search" />
-    <string name="confidence">%s%%</string>
+    <string name="confidence">%.0f%%</string>
     <string name="brand">Apple Care</string>
+    <string name="guide_text_1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla tempus, mi eget tincidunt eleifend, est dui venenatis libero, id elementum quam augue vitae est. Nam interdum arcu ultricies porttitor vulputate. Etiam rutrum fringilla blandit. Curabitur purus augue, pharetra sed urna vel, condimentum congue sem. Etiam bibendum dolor nulla, sit amet consequat purus volutpat et. Integer non urna mauris. Fusce viverra porta eros ac scelerisque. Cras tristique dolor a massa porta mattis. "\n"
+
+Donec vitae quam accumsan, dignissim est vel, bibendum magna. Aenean porttitor sed lorem id mattis. Sed lacinia magna nec dolor consequat, id euismod odio cursus. Nulla nibh eros, dictum quis turpis sit amet, fermentum pellentesque justo. Vestibulum quis efficitur magna. Proin et massa sit amet sem aliquet dictum. Proin pellentesque pellentesque sollicitudin. Nam nec lacus id eros rutrum condimentum. Donec orci arcu, auctor vulputate erat a, consectetur fermentum augue. Nulla hendrerit et quam in tempus. Pellentesque id convallis orci, id cursus mauris.></string>
 </resources>

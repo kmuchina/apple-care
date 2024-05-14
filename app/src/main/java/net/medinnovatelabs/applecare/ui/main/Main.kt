@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MoreVert
@@ -29,9 +32,10 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -45,11 +49,14 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -91,6 +98,8 @@ fun Main(
 	onLogOut: () -> Unit,
 	modifier: Modifier = Modifier,
 	navController: NavHostController = rememberNavController(),
+	onGuideClicked: (Int) -> Unit,
+	onSettingsClicked: () -> Unit
 ) {
 	val backStackEntry by navController.currentBackStackEntryAsState()
 	val currentScreen = MainDestinations.valueOf(
@@ -102,6 +111,8 @@ fun Main(
 	var selectedIndex by rememberSaveable {
 		mutableIntStateOf(0)
 	}
+
+	var expanded by remember { mutableStateOf(false) }
 
 	ModalNavigationDrawer(
 		drawerContent = {
@@ -119,15 +130,14 @@ fun Main(
 			topBar = {
 				when (currentScreen.name) {
 					"Home" -> {
-						HomeTopAppBar(onMenuClicked = {
-							scope.launch {
-								drawerState.open()
-							}
-						})
+						HomeTopAppBar(
+							onMenuClicked = { scope.launch { drawerState.open() } },
+							onSettingsClicked = onSettingsClicked
+						)
 					}
 
 					"History" -> {
-						CenterAlignedTopAppBar(
+						TopAppBar(
 							title = {
 								Text(
 									stringResource(id = R.string.history),
@@ -141,24 +151,35 @@ fun Main(
 								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
 							),
 							actions = {
-								IconButton(onClick = { /*TODO*/ }) {
+								IconButton(onClick = { expanded = !expanded }) {
 									Icon(
-										Icons.Outlined.MoreVert,
+										Icons.Default.MoreVert,
 										contentDescription = "More",
-										tint = MaterialTheme.colorScheme.onPrimary,
-										modifier = Modifier.size(20.dp)
+										tint = MaterialTheme.colorScheme.onPrimary
 									)
+								}
+								Box(
+									modifier = Modifier.offset(x = -16.dp, y = 20.dp),
+									contentAlignment = Alignment.TopCenter
+								) {
+									DropdownMenu(
+										expanded = expanded,
+										onDismissRequest = { expanded = false }
+									) {
+										DropdownMenuItem(
+											text = { Text("Settings") },
+											onClick = { onSettingsClicked() },
+										)
+									}
 								}
 							}
 						)
 					}
 
-					"Camera" -> {
-						// TopAppBar(title = { Text("Take a picture") })
-					}
+					"Camera" -> { }
 
 					"Community" -> {
-						CenterAlignedTopAppBar(
+						TopAppBar(
 							title = {
 								Text(
 									stringResource(id = R.string.community),
@@ -172,20 +193,33 @@ fun Main(
 								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
 							),
 							actions = {
-								IconButton(onClick = { /*TODO*/ }) {
+								IconButton(onClick = { expanded = !expanded }) {
 									Icon(
 										Icons.Outlined.MoreVert,
 										contentDescription = "More",
-										tint = MaterialTheme.colorScheme.onPrimary,
-										modifier = Modifier.size(20.dp)
+										tint = MaterialTheme.colorScheme.onPrimary
 									)
+								}
+								Box(
+									modifier = Modifier.offset(x = -16.dp, y = 20.dp),
+									contentAlignment = Alignment.TopCenter
+								) {
+									DropdownMenu(
+										expanded = expanded,
+										onDismissRequest = { expanded = false }
+									) {
+										DropdownMenuItem(
+											text = { Text("Settings") },
+											onClick = { onSettingsClicked() },
+										)
+									}
 								}
 							}
 						)
 					}
 
 					"Profile" -> {
-						CenterAlignedTopAppBar(
+						TopAppBar(
 							title = {
 								Text(
 									stringResource(id = R.string.profile),
@@ -199,7 +233,7 @@ fun Main(
 								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
 							),
 							actions = {
-								IconButton(onClick = { /*TODO*/ }) {
+								IconButton(onClick = onSettingsClicked) {
 									Icon(
 										Icons.Outlined.Settings,
 										contentDescription = "Settings",
@@ -225,7 +259,7 @@ fun Main(
 						.offset(y = 76.dp)
 				) {
 					Icon(
-						painterResource(id = R.drawable.ic_camera_selected),
+						Icons.Default.CameraAlt,
 						contentDescription = "Take a picture",
 						tint = MaterialTheme.colorScheme.onPrimaryContainer
 					)
@@ -240,7 +274,11 @@ fun Main(
 				Modifier.padding(innerPadding)
 			) {
 				composable(MainDestinations.Home.name) {
-					Home(location = location, onFindAgro = onFindAgro)
+					Home(
+						location = location,
+						onFindAgro = onFindAgro,
+						onGuideClicked = onGuideClicked
+					)
 				}
 				composable(MainDestinations.History.name) {
 					History()
@@ -256,6 +294,8 @@ fun Main(
 				composable(MainDestinations.Profile.name) {
 					Profile(userData = userData, onLogOut = onLogOut)
 				}
+
+
 			}
 		}
 	}
@@ -488,7 +528,7 @@ fun BottomNavigationBar(
 							id = R.drawable.ic_community_selected
 						)
 						else painterResource(id = R.drawable.ic_community_unselected),
-							contentDescription = stringResource(id = R.string.community)
+						contentDescription = stringResource(id = R.string.community)
 					)
 				}
 			},
@@ -527,5 +567,13 @@ fun BottomNavigationBar(
 @Preview
 @Composable
 fun MainPreview() {
-	Main(onCamera = { }, onFindAgro = { }, onLogOut = { }, location = "", userData = null)
+	Main(
+		location = "",
+		userData = null,
+		onCamera = { },
+		onFindAgro = { },
+		onLogOut = { },
+		onGuideClicked = { },
+		onSettingsClicked = { }
+	)
 }

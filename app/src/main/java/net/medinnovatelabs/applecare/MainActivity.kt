@@ -39,12 +39,14 @@ import net.medinnovatelabs.applecare.firebasedata.GoogleAuthUiClient
 import net.medinnovatelabs.applecare.firebasedata.SignInViewModel
 import net.medinnovatelabs.applecare.ui.Camera.Camera
 import net.medinnovatelabs.applecare.ui.Destinations
+import net.medinnovatelabs.applecare.ui.Guide
 import net.medinnovatelabs.applecare.ui.authentication.AllSet
 import net.medinnovatelabs.applecare.ui.authentication.LogIn
 import net.medinnovatelabs.applecare.ui.authentication.MoreInfo
 import net.medinnovatelabs.applecare.ui.authentication.OnBoardingScreen
 import net.medinnovatelabs.applecare.ui.authentication.SignUp
 import net.medinnovatelabs.applecare.ui.main.Main
+import net.medinnovatelabs.applecare.ui.settings.Settings
 import java.util.Locale
 
 @AndroidEntryPoint
@@ -186,7 +188,7 @@ class MainActivity : ComponentActivity() {
 								this@MainActivity, PERMISSIONS, 0
 							)
 						}
-						Camera()
+						Camera(onBack = { navController.popBackStack() })
 					}
 
 					composable(route = Destinations.Main.name) {
@@ -200,6 +202,8 @@ class MainActivity : ComponentActivity() {
 							userData = googleAuthUiClient.getSignedInUser(),
 							onFindAgro = { startActivity(mapIntent) },
 							onCamera = { navController.navigate("camera") },
+							onGuideClicked = { navController.navigate("guides/$it") },
+							onSettingsClicked = { navController.navigate("settings") },
 							onLogOut = {
 								lifecycleScope.launch {
 									googleAuthUiClient.signOut()
@@ -215,11 +219,29 @@ class MainActivity : ComponentActivity() {
 							}
 						)
 					}
-				}
 
+					composable(route = "guides/{guideNo}") {
+						navController.currentBackStackEntry?.arguments?.getInt("guideNo")
+							?.let { it1 ->
+								Guide(
+									it1,
+									onBack = {
+										navController.navigate(Destinations.Main.name) {
+											popUpTo(Destinations.Main.name) {
+												inclusive = true; saveState = true
+											}
+										}
+									}
+								)
+							}
+					}
+
+					composable(route = "settings") {
+						Settings(onBack = { navController.popBackStack() })
+					}
+				}
 			}
 		}
-
 	}
 
 	private fun hasRequiredPermissions(): Boolean {
@@ -254,7 +276,7 @@ class MainActivity : ComponentActivity() {
 			}
 
 	}
-	
+
 	@Composable
 	private fun getLocationName(location: Location?): String {
 		val geocoder = Geocoder(LocalContext.current, Locale.getDefault())

@@ -1,6 +1,5 @@
 package net.medinnovatelabs.applecare.ui.main
 
-
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -135,7 +134,7 @@ fun HistoryCards(
 				Text(
 					text = stringResource(
 						id = R.string.confidence,
-						(classifiedImage.confidence * 100).toString()
+						(classifiedImage.confidence * 100)
 					),
 					modifier = Modifier
 						.fillMaxWidth(),

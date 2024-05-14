@@ -23,34 +23,41 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.sharp.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Cameraswitch
 import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -69,7 +76,8 @@ import java.io.InputStream
 @ExperimentalMaterial3Api
 @Composable
 fun Camera(
-	viewModel: CameraViewModel = hiltViewModel()
+	viewModel: CameraViewModel = hiltViewModel(),
+	onBack: () -> Unit
 ) {
 	val context = LocalContext.current
 	val controller = remember {
@@ -114,6 +122,30 @@ fun Camera(
 	BottomSheetScaffold(
 		scaffoldState = scaffoldState,
 		sheetPeekHeight = sheetPeekHeight.dp,
+		topBar = {
+			CenterAlignedTopAppBar(
+				navigationIcon = {
+					IconButton(onClick = onBack) {
+						Icon(
+							Icons.AutoMirrored.Sharp.ArrowBack,
+							null
+						)
+					}
+				},
+				title = {
+					Text(
+						"Take a Picture",
+						style = MaterialTheme.typography.titleMedium,
+						color = MaterialTheme.colorScheme.onPrimary
+					)
+				},
+				colors = TopAppBarDefaults.mediumTopAppBarColors(
+					containerColor = MaterialTheme.colorScheme.primary,
+					titleContentColor = MaterialTheme.colorScheme.onPrimary,
+					navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+				)
+			)
+		},
 		sheetContent = {
 			bitmap?.let {
 				PhotoBottomSheetContent(bitmap = it, label = viewModel.label.value) {
@@ -121,41 +153,46 @@ fun Camera(
 				}
 			}
 		}
-	) { padding ->
-		Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(padding)
+	) { it ->
+		Column(
+			modifier = Modifier.padding(it)
 		) {
-			CameraPreview(
-				controller = controller,
-				modifier = Modifier.fillMaxSize()
-			)
-			Box(
-				contentAlignment = Alignment.Center,
-				modifier = Modifier
-					.padding(horizontal = 24.dp, vertical = 16.dp)
-					.size(48.dp)
-					.background(Color.White, shape = CircleShape)
-					.clickable( // Wrap Box with Clickable
-						onClick = {
-							Toast
-								.makeText(
-									context,
-									"Camera switching in 1...2..",
-									Toast.LENGTH_SHORT
-								)
-								.show()
-							controller.cameraSelector =
-								if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-									CameraSelector.DEFAULT_FRONT_CAMERA
-								} else CameraSelector.DEFAULT_BACK_CAMERA
-						}
-					)
-			) {
+			Surface {
+				CameraPreview(
+					controller = controller,
+					modifier = Modifier
+						.fillMaxWidth()
+						.fillMaxHeight(0.7f)
+				)
 				IconButton(
+					modifier = Modifier
+						.padding(horizontal = 24.dp, vertical = 16.dp)
+						.size(48.dp)
+						.background(
+							MaterialTheme.colorScheme.primary,
+							shape = CircleShape
+						)
+						.clickable( // Wrap Box with Clickable
+							onClick = {
+								Toast
+									.makeText(
+										context,
+										"Camera switching in 1...2..",
+										Toast.LENGTH_SHORT
+									)
+									.show()
+								controller.cameraSelector =
+									if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+										CameraSelector.DEFAULT_FRONT_CAMERA
+									} else CameraSelector.DEFAULT_BACK_CAMERA
+							}
+						),
 					onClick = {
-						Toast.makeText(context, "Camera switching in 1...2..", Toast.LENGTH_SHORT)
+						Toast.makeText(
+							context,
+							"Camera switching in 1...2..",
+							Toast.LENGTH_SHORT
+						)
 							.show()
 
 						controller.cameraSelector =
@@ -167,24 +204,27 @@ fun Camera(
 					Icon(
 						imageVector = Icons.Outlined.Cameraswitch,
 						contentDescription = "Switch Camera",
-						tint = Color(0xFF0D5210)
+						tint = MaterialTheme.colorScheme.onPrimary
 					)
 				}
 			}
-
-
 			Row(
 				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
-					.align(Alignment.BottomStart)
 					.fillMaxWidth()
+					.fillMaxHeight()
 					.padding(horizontal = 20.dp)
 			) {
-				Box(
+				var takePhoto by remember { mutableStateOf(false) }
+				IconButton(
 					modifier = Modifier
 						.padding(16.dp)
-						.size(48.dp)
-						.background(Color.White, shape = CircleShape)
+						.size(72.dp)
+						.background(
+							MaterialTheme.colorScheme.primary,
+							shape = CircleShape
+						)
 						.clickable(
 							onClick = {
 								Toast
@@ -196,48 +236,35 @@ fun Camera(
 									.show()
 								galleryLauncher.launch("image/*")
 							}
-						)
-				) {
-					IconButton(
-						onClick = {
-							// Open gallery when clicked
-							Toast.makeText(
-								context,
-								"A moment please...🫸🏾...Opening your Gallery...📸",
-								Toast.LENGTH_SHORT
-							).show()
-							galleryLauncher.launch("image/*")
-						}
-					) {
-						Icon(
-							imageVector = Icons.Outlined.Photo,
-							contentDescription = "Open Gallery",
-							tint = Color(0xFF0C3A0E)
-						)
+						),
+					onClick = {
+						// Open gallery when clicked
+						Toast.makeText(
+							context,
+							"A moment please...🫸🏾...Opening your Gallery...📸",
+							Toast.LENGTH_SHORT
+						).show()
+						galleryLauncher.launch("image/*")
 					}
+				) {
+					Icon(
+						imageVector = Icons.Outlined.Photo,
+						contentDescription = "Open Gallery",
+						tint = MaterialTheme.colorScheme.onPrimary,
+						modifier = Modifier.fillMaxSize(0.5f)
+					)
 				}
 
-				Box(
+				IconButton(
 					modifier = Modifier
 						.padding(16.dp)
-						.size(48.dp)
-						.background(Color.White, shape = CircleShape)
-						.clickable(
-							onClick = {
-								takePhoto(
-									controller = controller,
-									context = context,
-									onPhotoTaken = {
-										scope.launch {
-											viewModel.onTakePhoto(it)
-										}
-									}
-								)
-							}
-						)
-				) {
-					IconButton(
-						onClick = {
+						.size(72.dp)
+						.background(
+							MaterialTheme.colorScheme.primary,
+							shape = CircleShape
+						),
+					onClick = {
+						if(takePhoto) {
 							takePhoto(
 								controller = controller,
 								context = context,
@@ -247,14 +274,31 @@ fun Camera(
 									}
 								}
 							)
+						} else {
+							takePhoto = true
 						}
-					) {
+
+					}
+				) {
+					if(takePhoto) {
+						Icon(
+							imageVector = Icons.Default.Check,
+							contentDescription = "Photo Ok",
+							tint = MaterialTheme.colorScheme.onPrimary,
+							modifier = Modifier
+						)
+
+					} else {
 						Icon(
 							imageVector = Icons.Outlined.PhotoCamera,
-							contentDescription = "Take Photo",
-							tint = Color(0xFF0C3A0E)
+							contentDescription = "Photo Ok",
+							tint = MaterialTheme.colorScheme.onPrimary,
+							modifier = Modifier
+								.fillMaxSize(0.5f)
 						)
 					}
+
+
 				}
 			}
 		}

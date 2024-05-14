@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -36,10 +38,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -52,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -61,8 +66,9 @@ import kotlin.math.absoluteValue
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopAppBar(
+	modifier: Modifier = Modifier,
 	onMenuClicked: () -> Unit,
-	modifier: Modifier = Modifier
+	onSettingsClicked: () -> Unit
 ) {
 	var expanded by remember { mutableStateOf(false) }
 	CenterAlignedTopAppBar(
@@ -89,28 +95,7 @@ fun HomeTopAppBar(
 			navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
 		),
 		actions = {
-			/*BadgedBox(
-				badge = {
-					Badge(
-						modifier = Modifier
-							.offset(y = 10.dp, x = (-17).dp)
-							.size(10.dp),
-					) {
-					}
-				},
-
-				) {
-				IconButton(onClick = { *//*TODO*//* }) {
-					Icon(
-						Icons.Outlined.Notifications,
-						contentDescription = "Notifications",
-						tint = MaterialTheme.colorScheme.onPrimary,
-						modifier = Modifier.size(20.dp)
-					)
-				}
-			}*/
-
-			IconButton(onClick = { /*TODO*/ }) {
+			IconButton(onClick = onSettingsClicked) {
 				Icon(
 					Icons.Outlined.Settings,
 					contentDescription = "Settings",
@@ -123,7 +108,12 @@ fun HomeTopAppBar(
 }
 
 @Composable
-fun Home(location: String, modifier: Modifier = Modifier, onFindAgro: () -> Unit) {
+fun Home(
+	location: String,
+	modifier: Modifier = Modifier,
+	onFindAgro: () -> Unit,
+	onGuideClicked: (Int) -> Unit
+) {
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,
 		verticalArrangement = Arrangement.Top,
@@ -133,7 +123,7 @@ fun Home(location: String, modifier: Modifier = Modifier, onFindAgro: () -> Unit
 	) {
 		WeatherBox(location = location)
 
-		Guides()
+		Guides(onGuideClicked = onGuideClicked)
 
 		AgroVetNearMe(onFindAgro = onFindAgro)
 	}
@@ -196,8 +186,13 @@ fun WeatherBox(location: String, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Guides(modifier: Modifier = Modifier) {
+fun Guides(
+	onGuideClicked: (Int) -> Unit,
+	modifier: Modifier = Modifier
+) {
 	val pagerState = rememberPagerState(pageCount = { 3 })
+
+	val scope = rememberCoroutineScope()
 
 	Column(
 		horizontalAlignment = Alignment.CenterHorizontally,
@@ -211,67 +206,119 @@ fun Guides(modifier: Modifier = Modifier) {
 				.padding(top = 20.dp, start = 2.dp)
 				.fillMaxWidth()
 		)
-		HorizontalPager(
-			state = pagerState,
-			pageSize = PageSize.Fixed(300.dp),
-			pageSpacing = 8.dp,
+
+		Box(
+			contentAlignment = Alignment.CenterStart,
 			modifier = modifier
-				.padding(bottom = 8.dp)
 				.fillMaxWidth()
-		) { page ->
-			Box(
-				modifier = Modifier
-					.clip(RoundedCornerShape(12.dp))
-					.width(300.dp)
-					.height(200.dp)
-					.graphicsLayer {
-						val pageOffset = (
-								(pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-								).absoluteValue
-
-						alpha = lerp(
-							start = 0.5f,
-							stop = 1f,
-							fraction = 1f - pageOffset.coerceIn(0f, 1f)
-						)
-					}
-			) {
-				val gradient = Brush.verticalGradient(
-					colors = listOf(Color.Transparent, Color.Black)
-				)
-
-				Image(
-					painter = painterResource(id = R.drawable.wambugu_holding_apples2),
-					contentDescription = "Background Image",
-					contentScale = ContentScale.Crop,
-					modifier = Modifier
-						.fillMaxSize()
-						.clip(RoundedCornerShape(10.dp))
-
-				)
+		) {
+			HorizontalPager(
+				state = pagerState,
+				pageSize = PageSize.Fixed(300.dp),
+				pageSpacing = 8.dp,
+				modifier = modifier
+					.padding(bottom = 8.dp)
+			) { page ->
 
 				Box(
 					modifier = Modifier
-						.fillMaxWidth()
-						.height(44.dp)
-						.align(Alignment.BottomStart)
-						.background(gradient)
+						.clip(RoundedCornerShape(12.dp))
+						.width(300.dp)
+						.height(200.dp)
+						.clickable {
+							onGuideClicked(page)
+						}
+						.graphicsLayer {
+							val pageOffset = (
+									(pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+									).absoluteValue
+
+							alpha = lerp(
+								start = 0.5f,
+								stop = 1f,
+								fraction = 1f - pageOffset.coerceIn(0f, 1f)
+							)
+						}
 				) {
-					Text(
-						text = "How to Get Better Yeilds",
-						color = Color.White,
-						fontSize = 20.sp,
+					val gradient = Brush.verticalGradient(
+						colors = listOf(Color.Transparent, Color.Black)
+					)
+
+					Image(
+						painter = painterResource(id = R.drawable.wambugu_holding_apples2),
+						contentDescription = "Background Image",
+						contentScale = ContentScale.Crop,
 						modifier = Modifier
-							.align(Alignment.CenterStart)
-							.padding(top = 4.dp, bottom = 4.dp, start = 8.dp)
+							.fillMaxSize()
+							.clip(RoundedCornerShape(10.dp))
 
 					)
+
+					Box(
+						modifier = Modifier
+							.fillMaxWidth()
+							.height(44.dp)
+							.align(Alignment.BottomStart)
+							.background(gradient)
+					) {
+						Text(
+							text = "How to Get Better Yeilds",
+							color = Color.White,
+							fontSize = 20.sp,
+							modifier = Modifier
+								.align(Alignment.CenterStart)
+								.padding(top = 4.dp, bottom = 4.dp, start = 8.dp)
+						)
+					}
 				}
+			}
 
+			if (pagerState.currentPage != 0) {
+				IconButton(
+					onClick = {
+						if (pagerState.currentPage > 0)
+							scope.launch {
+								pagerState.animateScrollToPage(pagerState.currentPage - 1)
+							}
+					},
+					modifier = Modifier
+						.background(
+							color = MaterialTheme.colorScheme.primaryContainer,
+							shape = RoundedCornerShape(50)
+						)
 
+				) {
+					Icon(
+						Icons.Rounded.ArrowBackIosNew,
+						"null"
+					)
+				}
+			}
+
+			if (pagerState.currentPage != pagerState.pageCount - 1) {
+				IconButton(
+					onClick = {
+						if (pagerState.currentPage < 2)
+							scope.launch {
+								pagerState.animateScrollToPage(pagerState.currentPage + 1)
+							}
+					},
+					modifier = Modifier
+						.size(44.dp)
+						.background(
+							color = MaterialTheme.colorScheme.primaryContainer,
+							shape = RoundedCornerShape(50)
+						)
+						.align(Alignment.CenterEnd)
+						.rotate(180f)
+				) {
+					Icon(
+						Icons.Rounded.ArrowBackIosNew,
+						"null"
+					)
+				}
 			}
 		}
-
 	}
 }
 
@@ -358,11 +405,11 @@ fun AgroVetNearMe(modifier: Modifier = Modifier, onFindAgro: () -> Unit) {
 @Preview
 @Composable
 fun TopAppBarPreview() {
-	HomeTopAppBar(onMenuClicked = { })
+	HomeTopAppBar(onMenuClicked = { }, onSettingsClicked = { })
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomePreview() {
-	Home(onFindAgro = { }, location = "")
+	Home(onFindAgro = { }, location = "", onGuideClicked = { })
 }
