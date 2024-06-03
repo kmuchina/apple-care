@@ -11,3 +11,4 @@ data class ClassifiedImage(
 	val label: String,
 	val confidence: Float,
 )
+

@@ -11,6 +11,9 @@ import net.medinnovatelabs.applecare.data.AppleCareDatabase
 import net.medinnovatelabs.applecare.data.ClassifiedImageDao
 import net.medinnovatelabs.applecare.data.ClassifiedImageRepository
 import net.medinnovatelabs.applecare.data.ClassifiedImageRepositoryImpl
+import net.medinnovatelabs.applecare.data.CommunityPostDao
+import net.medinnovatelabs.applecare.data.CommunityPostRepository
+import net.medinnovatelabs.applecare.data.CommunityPostRepositoryImpl
 import net.medinnovatelabs.applecare.firebasedata.AuthRepository
 import net.medinnovatelabs.applecare.firebasedata.AuthRepositoryImpl
 import javax.inject.Singleton
@@ -18,6 +21,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+	@Provides
+	@Singleton
+	fun providesAppleCareDatabase(@ApplicationContext context: Context): AppleCareDatabase {
+		return AppleCareDatabase.getDatabase(context)
+	}
 
 	@Provides
 	@Singleton
@@ -36,15 +45,21 @@ object AppModule {
 	}
 
 	@Provides
-	@Singleton
-	fun providesAppleCareDatabase(@ApplicationContext context: Context): AppleCareDatabase {
-		return AppleCareDatabase.getDatabase(context)
-	}
-
-	@Provides
 	fun providesClassifiedImageRepository(classifiedImageDao: ClassifiedImageDao): ClassifiedImageRepository {
 		return ClassifiedImageRepositoryImpl(classifiedImageDao)
 	}
+
+	@Provides
+	@Singleton
+	fun providesCommunityPostDao(appleCareDatabase: AppleCareDatabase): CommunityPostDao {
+		return appleCareDatabase.communityPostDao()
+	}
+
+	@Provides
+	fun providesCommunityPostRepository(communityPostDao: CommunityPostDao): CommunityPostRepository {
+		return CommunityPostRepositoryImpl(communityPostDao)
+	}
+
 }
 
 //https://chat.whatsapp.com/DtWoGm2OXRVD576aidnnW6

@@ -1,7 +1,6 @@
 package net.medinnovatelabs.applecare.ui.main
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -24,12 +22,9 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
@@ -80,6 +75,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.firebasedata.UserData
+import net.medinnovatelabs.applecare.ui.main.community.Community
+import net.medinnovatelabs.applecare.ui.main.community.CommunityTopAppBar
 
 enum class MainDestinations(@StringRes val route: Int) {
 	Home(route = R.string.home),
@@ -96,6 +93,7 @@ fun Main(
 	onCamera: () -> Unit,
 	onFindAgro: () -> Unit,
 	onLogOut: () -> Unit,
+	onAddPostClicked: () -> Unit,
 	modifier: Modifier = Modifier,
 	navController: NavHostController = rememberNavController(),
 	onGuideClicked: (Int) -> Unit,
@@ -176,45 +174,12 @@ fun Main(
 						)
 					}
 
-					"Camera" -> { }
+					"Camera" -> {}
 
 					"Community" -> {
-						TopAppBar(
-							title = {
-								Text(
-									stringResource(id = R.string.community),
-									style = MaterialTheme.typography.titleMedium,
-									color = MaterialTheme.colorScheme.onPrimary
-								)
-							},
-							colors = TopAppBarDefaults.mediumTopAppBarColors(
-								containerColor = MaterialTheme.colorScheme.primary,
-								titleContentColor = MaterialTheme.colorScheme.onPrimary,
-								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-							),
-							actions = {
-								IconButton(onClick = { expanded = !expanded }) {
-									Icon(
-										Icons.Outlined.MoreVert,
-										contentDescription = "More",
-										tint = MaterialTheme.colorScheme.onPrimary
-									)
-								}
-								Box(
-									modifier = Modifier.offset(x = -16.dp, y = 20.dp),
-									contentAlignment = Alignment.TopCenter
-								) {
-									DropdownMenu(
-										expanded = expanded,
-										onDismissRequest = { expanded = false }
-									) {
-										DropdownMenuItem(
-											text = { Text("Settings") },
-											onClick = { onSettingsClicked() },
-										)
-									}
-								}
-							}
+						CommunityTopAppBar(
+							onSettingsClicked = onSettingsClicked,
+							onAddPost = onAddPostClicked
 						)
 					}
 
@@ -285,11 +250,7 @@ fun Main(
 				}
 
 				composable(MainDestinations.Community.name) {
-					Image(
-						painterResource(R.drawable.pic_wip),
-						"Work In Progress",
-						modifier = Modifier.fillMaxSize()
-					)
+					Community()
 				}
 				composable(MainDestinations.Profile.name) {
 					Profile(userData = userData, onLogOut = onLogOut)
@@ -516,21 +477,13 @@ fun BottomNavigationBar(
 				}
 			},
 			icon = {
-				BadgedBox(
-					badge = {
-						Badge {
-							Text("WIP")
-						}
-					}
-				) {
-					Icon(
-						if (currentScreen.name == stringResource(id = R.string.community)) painterResource(
-							id = R.drawable.ic_community_selected
-						)
-						else painterResource(id = R.drawable.ic_community_unselected),
-						contentDescription = stringResource(id = R.string.community)
+				Icon(
+					if (currentScreen.name == stringResource(id = R.string.community)) painterResource(
+						id = R.drawable.ic_community_selected
 					)
-				}
+					else painterResource(id = R.drawable.ic_community_unselected),
+					contentDescription = stringResource(id = R.string.community)
+				)
 			},
 			label = {
 				Text(
@@ -574,6 +527,7 @@ fun MainPreview() {
 		onFindAgro = { },
 		onLogOut = { },
 		onGuideClicked = { },
-		onSettingsClicked = { }
+		onSettingsClicked = { },
+		onAddPostClicked = { }
 	)
 }

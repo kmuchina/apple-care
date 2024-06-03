@@ -443,7 +443,7 @@ private fun getOutputDirectory(context: Context): File {
 		mediaDir else context.filesDir
 }
 
-private fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
+fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {
 	var inputStream: InputStream? = null
 	return try {
 		inputStream = contentResolver.openInputStream(this)

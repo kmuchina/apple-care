@@ -46,6 +46,7 @@ import net.medinnovatelabs.applecare.ui.authentication.MoreInfo
 import net.medinnovatelabs.applecare.ui.authentication.OnBoardingScreen
 import net.medinnovatelabs.applecare.ui.authentication.SignUp
 import net.medinnovatelabs.applecare.ui.main.Main
+import net.medinnovatelabs.applecare.ui.main.community.AddPost
 import net.medinnovatelabs.applecare.ui.settings.Settings
 import java.util.Locale
 
@@ -204,6 +205,7 @@ class MainActivity : ComponentActivity() {
 							onCamera = { navController.navigate("camera") },
 							onGuideClicked = { navController.navigate("guides/$it") },
 							onSettingsClicked = { navController.navigate("settings") },
+							onAddPostClicked = { navController.navigate("add_post") },
 							onLogOut = {
 								lifecycleScope.launch {
 									googleAuthUiClient.signOut()
@@ -238,6 +240,13 @@ class MainActivity : ComponentActivity() {
 
 					composable(route = "settings") {
 						Settings(onBack = { navController.popBackStack() })
+					}
+
+					composable(route = "add_post") {
+						AddPost(
+							onBack = { navController.popBackStack() },
+							userData = googleAuthUiClient.getSignedInUser()
+						)
 					}
 				}
 			}

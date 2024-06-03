@@ -95,8 +95,7 @@ fun HistoryCards(
 	val bitmap = convertStringToBitmap(classifiedImage.name)
 	OutlinedCard(
 		modifier = Modifier
-			.fillMaxWidth()
-			.height(150.dp),
+			.fillMaxWidth(),
 		border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.primaryContainer)
 
 	) {
