@@ -70,29 +70,24 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
-import net.medinnovatelabs.applecare.firebasedata.UserData
 import net.medinnovatelabs.applecare.ui.main.community.Community
 import net.medinnovatelabs.applecare.ui.main.community.CommunityTopAppBar
 
 enum class MainDestinations(@StringRes val route: Int) {
 	Home(route = R.string.home),
 	History(route = R.string.history),
-	Community(route = R.string.community),
-	Profile(route = R.string.profile)
+	Community(route = R.string.community)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Main(
 	location: String,
-	userData: UserData?,
 	onCamera: () -> Unit,
 	onFindAgro: () -> Unit,
-	onLogOut: () -> Unit,
 	onAddPostClicked: () -> Unit,
 	modifier: Modifier = Modifier,
 	navController: NavHostController = rememberNavController(),
@@ -117,9 +112,7 @@ fun Main(
 			DrawerContent(
 				scope,
 				drawerState,
-				userData,
-				onLogOut,
-				onProfileClick = { navController.navigate("profile") }
+				onSettingsClick = onSettingsClicked
 			)
 		},
 		drawerState = drawerState,
@@ -183,35 +176,9 @@ fun Main(
 						)
 					}
 
-					"Profile" -> {
-						TopAppBar(
-							title = {
-								Text(
-									stringResource(id = R.string.profile),
-									style = MaterialTheme.typography.titleMedium,
-									color = MaterialTheme.colorScheme.onPrimary
-								)
-							},
-							colors = TopAppBarDefaults.mediumTopAppBarColors(
-								containerColor = MaterialTheme.colorScheme.primary,
-								titleContentColor = MaterialTheme.colorScheme.onPrimary,
-								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-							),
-							actions = {
-								IconButton(onClick = onSettingsClicked) {
-									Icon(
-										Icons.Outlined.Settings,
-										contentDescription = "Settings",
-										tint = MaterialTheme.colorScheme.onPrimary,
-										modifier = Modifier.size(20.dp)
-									)
-								}
-							}
-						)
-					}
 				}
 			},
-			bottomBar = { BottomNavigationBar(navController, currentScreen) },
+			bottomBar = { BottomNavigationBar(navController, currentScreen, onSettingsClicked) },
 			floatingActionButtonPosition = FabPosition.Center,
 			floatingActionButton = {
 				FloatingActionButton(
@@ -252,9 +219,6 @@ fun Main(
 				composable(MainDestinations.Community.name) {
 					Community()
 				}
-				composable(MainDestinations.Profile.name) {
-					Profile(userData = userData, onLogOut = onLogOut)
-				}
 
 
 			}
@@ -266,9 +230,7 @@ fun Main(
 fun DrawerContent(
 	scope: CoroutineScope,
 	drawerState: DrawerState,
-	userData: UserData?,
-	onLogOut: () -> Unit,
-	onProfileClick: () -> Unit
+	onSettingsClick: () -> Unit
 ) {
 	ModalDrawerSheet {
 		Row(
@@ -306,47 +268,6 @@ fun DrawerContent(
 				.fillMaxHeight(0.9f)
 		) {
 			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.padding(bottom = 16.dp, start = 16.dp, end = 16.dp, top = 12.dp)
-					.height(100.dp)
-			) {
-				if (userData?.profilePictureUrl != null) {
-					AsyncImage(
-						model = userData.profilePictureUrl,
-						contentDescription = "Profile picture",
-						modifier = Modifier
-							.size(80.dp)
-							.clip(CircleShape),
-						contentScale = ContentScale.Fit
-					)
-					Spacer(modifier = Modifier.height(16.dp))
-				} else {
-					Icon(Icons.Rounded.Person, "null", modifier = Modifier.size(100.dp))
-				}
-
-				Column(
-					verticalArrangement = Arrangement.SpaceEvenly,
-					modifier = Modifier
-						.fillMaxWidth()
-						.fillMaxHeight()
-						.padding(top = 4.dp, start = 12.dp, bottom = 0.dp, end = 0.dp)
-				) {
-					Text(
-						text = "Hi,",
-						fontSize = 20.sp,
-					)
-					if (userData?.username != null) {
-						Text(
-							text = userData.username,
-							fontSize = 16.sp,
-							fontWeight = FontWeight.Bold
-						)
-					}
-				}
-			}
-
-			Row(
 				verticalAlignment = Alignment.Bottom,
 				modifier = Modifier
 					.padding(vertical = 12.dp, horizontal = 16.dp)
@@ -354,18 +275,18 @@ fun DrawerContent(
 						scope.launch {
 							drawerState.close()
 						}
-						onProfileClick()
+						onSettingsClick()
 					}
 			) {
 				Icon(
-					Icons.Rounded.Person,
-					contentDescription = "Profile",
+					Icons.Outlined.Settings,
+					contentDescription = "Settings",
 					modifier = Modifier
 						.size(32.dp)
 				)
 				Spacer(Modifier.width(20.dp))
 				Text(
-					text = "Profile",
+					text = "Settings",
 					fontSize = 16.sp,
 					modifier = Modifier.padding(bottom = 1.dp)
 				)
@@ -392,21 +313,6 @@ fun DrawerContent(
 			}
 
 		}
-
-		Button(
-			onClick = onLogOut,
-			colors = ButtonDefaults.buttonColors(
-				containerColor = MaterialTheme.colorScheme.primaryContainer,
-				contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-			),
-			modifier = Modifier
-				.fillMaxWidth(0.4f)
-				.height(36.dp)
-				.align(Alignment.CenterHorizontally)
-		) {
-			Text("Sign Out")
-		}
-
 	}
 }
 
@@ -416,6 +322,7 @@ fun DrawerContent(
 fun BottomNavigationBar(
 	navController: NavHostController,
 	currentScreen: MainDestinations,
+	onSettingsClicked: () -> Unit,
 	modifier: Modifier = Modifier
 ) {
 	NavigationBar {
@@ -492,23 +399,19 @@ fun BottomNavigationBar(
 				)
 			}
 		)
+		// Settings opens its own screen, so it is never shown as the selected tab
 		NavigationBarItem(
-			selected = currentScreen.name == stringResource(id = R.string.profile),
-			onClick = {
-				navController.navigate(MainDestinations.Profile.name) {
-					popUpTo(route = MainDestinations.Profile.name) { inclusive = true }
-				}
-			},
+			selected = false,
+			onClick = onSettingsClicked,
 			icon = {
 				Icon(
-					if (currentScreen.name == stringResource(id = R.string.profile)) Icons.Filled.Person
-					else Icons.Outlined.Person,
-					contentDescription = stringResource(id = R.string.profile)
+					Icons.Outlined.Settings,
+					contentDescription = stringResource(id = R.string.settings)
 				)
 			},
 			label = {
 				Text(
-					text = stringResource(id = R.string.profile),
+					text = stringResource(id = R.string.settings),
 					fontSize = 10.sp
 				)
 			},
@@ -522,10 +425,8 @@ fun BottomNavigationBar(
 fun MainPreview() {
 	Main(
 		location = "",
-		userData = null,
 		onCamera = { },
 		onFindAgro = { },
-		onLogOut = { },
 		onGuideClicked = { },
 		onSettingsClicked = { },
 		onAddPostClicked = { }

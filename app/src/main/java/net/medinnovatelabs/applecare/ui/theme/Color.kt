@@ -1,4 +1,4 @@
-package com.example.compose
+package net.medinnovatelabs.applecare.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryGreen = Color(0xFF5DB075)

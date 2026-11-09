@@ -2,6 +2,7 @@ package net.medinnovatelabs.applecare.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.annotation.WorkerThread
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
 import net.medinnovatelabs.applecare.ml.AppleV2
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertBitmapToString
@@ -14,15 +15,21 @@ object TensorFLowHelper {
 
 	const val IMAGESIZE = 128
 
-	fun classifyImage(
-		image: Bitmap,
-		context: Context,
-		callback: ((classifiedImage: ClassifiedImage) -> Unit)
-	) {
-		// Load the TFLite model.
-		val model = AppleV2.newInstance(context)
+	private val classLabels =
+		arrayOf("Apple Black Rot", "Apple Cedar Rust", "Healthy Apple", "Apple Scab")
 
-		// Creates inputs for reference.
+	// Loading the model is expensive, so it is created once and reused for the app's lifetime.
+	private var model: AppleV2? = null
+
+	/**
+	 * Classifies [image], which must already be [IMAGESIZE] x [IMAGESIZE].
+	 * Runs inference synchronously: call it from a background dispatcher.
+	 */
+	@WorkerThread
+	@Synchronized
+	fun classifyImage(image: Bitmap, context: Context): ClassifiedImage {
+		val model = model ?: AppleV2.newInstance(context.applicationContext).also { model = it }
+
 		val inputFeature0: TensorBuffer =
 			TensorBuffer.createFixedSize(intArrayOf(1, IMAGESIZE, IMAGESIZE, 3), DataType.FLOAT32)
 
@@ -32,25 +39,16 @@ object TensorFLowHelper {
 		val intValues = IntArray(IMAGESIZE * IMAGESIZE)
 		image.getPixels(intValues, 0, image.width, 0, 0, image.width, image.height)
 
-		var pixel = 0
-		// Iterate over each pixel and extract R, G, and B values.
-		// Add those values individually to the byte buffer.
-		for (i in 0 until IMAGESIZE) {
-			for (j in 0 until IMAGESIZE) {
-				val `val` = intValues[pixel++] // RGB
-				byteBuffer.putFloat((`val` shr 16 and 0xFF) * (1f / 1))
-				byteBuffer.putFloat((`val` shr 8 and 0xFF) * (1f / 1))
-				byteBuffer.putFloat((`val` and 0xFF) * (1f / 1))
-			}
+		// Extract R, G and B for each pixel. The model expects raw 0..255 float values.
+		for (pixel in intValues) {
+			byteBuffer.putFloat((pixel shr 16 and 0xFF).toFloat())
+			byteBuffer.putFloat((pixel shr 8 and 0xFF).toFloat())
+			byteBuffer.putFloat((pixel and 0xFF).toFloat())
 		}
 		inputFeature0.loadBuffer(byteBuffer)
 
-		// Runs model inference and gets result.
-		val outputs = model.process(inputFeature0)
-		val outputFeature0: TensorBuffer = outputs.getOutputFeature0AsTensorBuffer()
-		val confidences = outputFeature0.floatArray
+		val confidences = model.process(inputFeature0).outputFeature0AsTensorBuffer.floatArray
 
-		// Find the index of the class with the biggest confidence.
 		var maxPos = 0
 		var maxConfidence = 0f
 		for (i in confidences.indices) {
@@ -60,19 +58,10 @@ object TensorFLowHelper {
 			}
 		}
 
-		val classLabels =
-			arrayOf("Apple Black Rot", "Apple Cedar Rust", "Healthy Apple", "Apple Scab")
-		// arrayOf("Apple Scab", "Apple Black Rot", "Apple Cedar Rust", "Healthy Apple Leaf")
-
-		val classifiedImage = ClassifiedImage(
+		return ClassifiedImage(
 			name = convertBitmapToString(image),
 			label = classLabels[maxPos],
 			confidence = maxConfidence
 		)
-
-		callback.invoke(classifiedImage)
-
-		// Releases model resources if no longer used.
-		model.close()
 	}
 }

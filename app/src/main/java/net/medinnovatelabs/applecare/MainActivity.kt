@@ -1,310 +1,237 @@
 package net.medinnovatelabs.applecare
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
-import com.example.compose.AppleCareTheme
-import com.google.android.gms.auth.api.identity.Identity
+import androidx.navigation.navArgument
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.medinnovatelabs.applecare.firebasedata.GoogleAuthUiClient
-import net.medinnovatelabs.applecare.firebasedata.SignInViewModel
+import kotlinx.coroutines.withContext
 import net.medinnovatelabs.applecare.ui.Camera.Camera
-import net.medinnovatelabs.applecare.ui.Destinations
 import net.medinnovatelabs.applecare.ui.Guide
-import net.medinnovatelabs.applecare.ui.authentication.AllSet
-import net.medinnovatelabs.applecare.ui.authentication.LogIn
-import net.medinnovatelabs.applecare.ui.authentication.MoreInfo
-import net.medinnovatelabs.applecare.ui.authentication.OnBoardingScreen
-import net.medinnovatelabs.applecare.ui.authentication.SignUp
 import net.medinnovatelabs.applecare.ui.main.Main
 import net.medinnovatelabs.applecare.ui.main.community.AddPost
+import net.medinnovatelabs.applecare.ui.onboarding.OnBoardingScreen
 import net.medinnovatelabs.applecare.ui.settings.Settings
+import net.medinnovatelabs.applecare.ui.theme.AppleCareTheme
 import java.util.Locale
+
+private object Routes {
+	const val ONBOARDING = "onboard"
+	const val MAIN = "Main"
+	const val CAMERA = "camera"
+	const val GUIDE = "guides/{guideNo}"
+	const val SETTINGS = "settings"
+	const val ADD_POST = "add_post"
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-	private val googleAuthUiClient by lazy {
-		GoogleAuthUiClient(
-			context = applicationContext,
-			oneTapClient = Identity.getSignInClient(applicationContext)
-		)
-	}
-	lateinit var fusedLocationClient: FusedLocationProviderClient
-	private var location: Location? = null
+	private lateinit var fusedLocationClient: FusedLocationProviderClient
+	private var locationName by mutableStateOf(UNKNOWN_LOCATION)
+
+	private val locationPermissionLauncher =
+		registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+			if (grants.values.any { it }) loadLocation()
+		}
 
 	@OptIn(ExperimentalMaterial3Api::class)
-	@RequiresApi(Build.VERSION_CODES.R)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-		getLocation()
+
+		if (hasLocationPermission()) {
+			loadLocation()
+		} else {
+			locationPermissionLauncher.launch(LOCATION_PERMISSIONS)
+		}
+
+		val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+		val startDestination =
+			if (prefs.getBoolean(KEY_ONBOARDING_DONE, false)) Routes.MAIN else Routes.ONBOARDING
 
 		setContent {
 			AppleCareTheme {
 				val navController = rememberNavController()
-				val startDes = if (googleAuthUiClient.getSignedInUser() != null) {
-					Destinations.Main.name
-				} else {
-					Destinations.Auth.name
-				}
 
-				NavHost(navController = navController, startDestination = startDes) {
-					navigation(route = Destinations.Auth.name, startDestination = "onboard") {
-						composable(route = "onboard") {
-							OnBoardingScreen(
-								onSkip = { navController.navigate("Login") }
-							)
-						}
-
-						composable(route = "Login") {
-							val viewModel: SignInViewModel by viewModels()
-							val state by viewModel.state.collectAsStateWithLifecycle()
-
-							LaunchedEffect(key1 = Unit) {
-								if (googleAuthUiClient.getSignedInUser() != null) {
-									navController.navigate(Destinations.Main.name)
-								}
-							}
-
-							val launcher = rememberLauncherForActivityResult(
-								contract = ActivityResultContracts.StartIntentSenderForResult(),
-								onResult = { result ->
-									if (result.resultCode == RESULT_OK) {
-										lifecycleScope.launch {
-											val signInResult = googleAuthUiClient.signInWithIntent(
-												intent = result.data ?: return@launch
-											)
-											viewModel.onSignInResult(signInResult)
-										}
-									}
-								}
-							)
-
-							LogIn(
-								state = state,
-								onSignInWithGoogle = {
-									lifecycleScope.launch {
-										val signInIntentSender = googleAuthUiClient.signIn()
-										launcher.launch(
-											IntentSenderRequest.Builder(
-												signInIntentSender ?: return@launch
-											).build()
-										)
-									}
-								},
-								onSignUpClick = { navController.navigate("SignUp") },
-								onLoginClick = { navController.navigate(Destinations.Main.name) }
-							)
-						}
-
-						composable(route = "SignUp") {
-							val viewModel: SignInViewModel by viewModels()
-
-							val state by viewModel.state.collectAsStateWithLifecycle()
-							LaunchedEffect(key1 = Unit) {
-								if (googleAuthUiClient.getSignedInUser() != null) {
-									navController.navigate(Destinations.Main.name)
-								}
-							}
-
-							val launcher = rememberLauncherForActivityResult(
-								contract = ActivityResultContracts.StartIntentSenderForResult(),
-								onResult = { result ->
-									if (result.resultCode == RESULT_OK) {
-										lifecycleScope.launch {
-											val signInResult = googleAuthUiClient.signInWithIntent(
-												intent = result.data ?: return@launch
-											)
-											viewModel.onSignInResult(signInResult)
-										}
-									}
-								}
-							)
-							SignUp(
-								state = state,
-								onRegister = { navController.navigate("MoreInfo") },
-								onSignInClick = {
-									lifecycleScope.launch {
-										val signInIntentSender = googleAuthUiClient.signIn()
-										launcher.launch(
-											IntentSenderRequest.Builder(
-												signInIntentSender ?: return@launch
-											).build()
-										)
-									}
-									navController.navigate("MoreInfo")
-								},
-								onLoginClick = { navController.navigate("MoreInfo") }
-							)
-						}
-
-						composable(route = "MoreInfo") {
-							MoreInfo(
-								onCompleteReg = { navController.navigate("AllSet") },
-								onBack = { navController.popBackStack() }
-							)
-						}
-
-						composable(route = "AllSet") {
-							AllSet(onDelay = {
-								navController.navigate(Destinations.Main.name) {
-									popUpTo(Destinations.Auth.name) { inclusive = true }
-								}
-							})
-						}
-					}
-
-					composable("camera") {
-						if (!hasRequiredPermissions()) {
-							ActivityCompat.requestPermissions(
-								this@MainActivity, PERMISSIONS, 0
-							)
-						}
-						Camera(onBack = { navController.popBackStack() })
-					}
-
-					composable(route = Destinations.Main.name) {
-
-						val gmmIntentUri = Uri.parse("geo:0,0?z=15&q=agrovet+near+me")
-						val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-						mapIntent.setPackage("com.google.android.apps.maps")
-
-						Main(
-							location = getLocationName(location),
-							userData = googleAuthUiClient.getSignedInUser(),
-							onFindAgro = { startActivity(mapIntent) },
-							onCamera = { navController.navigate("camera") },
-							onGuideClicked = { navController.navigate("guides/$it") },
-							onSettingsClicked = { navController.navigate("settings") },
-							onAddPostClicked = { navController.navigate("add_post") },
-							onLogOut = {
-								lifecycleScope.launch {
-									googleAuthUiClient.signOut()
-									Toast.makeText(
-										applicationContext,
-										"Signed out...👋🏾",
-										Toast.LENGTH_LONG
-									).show()
-									navController.navigate(Destinations.Auth.name) {
-										popUpTo(Destinations.Auth.name) { inclusive = true }
-									}
+				NavHost(navController = navController, startDestination = startDestination) {
+					composable(Routes.ONBOARDING) {
+						OnBoardingScreen(
+							onSkip = {
+								prefs.edit { putBoolean(KEY_ONBOARDING_DONE, true) }
+								navController.navigate(Routes.MAIN) {
+									popUpTo(Routes.ONBOARDING) { inclusive = true }
 								}
 							}
 						)
 					}
 
-					composable(route = "guides/{guideNo}") {
-						navController.currentBackStackEntry?.arguments?.getInt("guideNo")
-							?.let { it1 ->
-								Guide(
-									it1,
-									onBack = {
-										navController.navigate(Destinations.Main.name) {
-											popUpTo(Destinations.Main.name) {
-												inclusive = true; saveState = true
-											}
-										}
-									}
-								)
-							}
+					composable(Routes.MAIN) {
+						Main(
+							location = locationName,
+							onFindAgro = ::openAgrovetSearch,
+							onCamera = { navController.navigate(Routes.CAMERA) },
+							onGuideClicked = { navController.navigate("guides/$it") },
+							onSettingsClicked = { navController.navigate(Routes.SETTINGS) },
+							onAddPostClicked = { navController.navigate(Routes.ADD_POST) }
+						)
 					}
 
-					composable(route = "settings") {
+					composable(Routes.CAMERA) {
+						CameraWithPermission(onBack = { navController.popBackStack() })
+					}
+
+					composable(
+						route = Routes.GUIDE,
+						arguments = listOf(navArgument("guideNo") { type = NavType.IntType })
+					) { backStackEntry ->
+						Guide(
+							guideNo = backStackEntry.arguments?.getInt("guideNo") ?: 0,
+							onBack = { navController.popBackStack() }
+						)
+					}
+
+					composable(Routes.SETTINGS) {
 						Settings(onBack = { navController.popBackStack() })
 					}
 
-					composable(route = "add_post") {
-						AddPost(
-							onBack = { navController.popBackStack() },
-							userData = googleAuthUiClient.getSignedInUser()
-						)
+					composable(Routes.ADD_POST) {
+						AddPost(onBack = { navController.popBackStack() })
 					}
 				}
 			}
 		}
 	}
 
-	private fun hasRequiredPermissions(): Boolean {
-		return PERMISSIONS.all { permission: String ->
-			ContextCompat.checkSelfPermission(
-				applicationContext,
-				permission
-			) == PackageManager.PERMISSION_GRANTED
-		}
-	}
-
-	private fun getLocation() {
-		if (ActivityCompat.checkSelfPermission(
-				this,
-				Manifest.permission.ACCESS_FINE_LOCATION
-			) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-				this,
-				Manifest.permission.ACCESS_COARSE_LOCATION
-			) != PackageManager.PERMISSION_GRANTED
-		) {
-			ActivityCompat.requestPermissions(
-				this@MainActivity, PERMISSIONS, 0
-			)
-		}
-		fusedLocationClient.lastLocation
-			.addOnSuccessListener { it ->
-				it?.let {
-					location = it
-				}
-			}
-			.addOnFailureListener { exception ->
-			}
-
-	}
-
+	@OptIn(ExperimentalMaterial3Api::class)
 	@Composable
-	private fun getLocationName(location: Location?): String {
-		val geocoder = Geocoder(LocalContext.current, Locale.getDefault())
-		var name: String = "Unknown Location"
-		/*location?.let { loc ->
-			geocoder.getFromLocation(loc.latitude, loc.longitude, 1) {
-				name = it[0].countryName
-			}
-		}*/
+	private fun CameraWithPermission(onBack: () -> Unit) {
+		var granted by remember { mutableStateOf(hasPermission(Manifest.permission.CAMERA)) }
+		val launcher = rememberLauncherForActivityResult(
+			ActivityResultContracts.RequestPermission()
+		) { granted = it }
 
-		return name
+		LaunchedEffect(Unit) {
+			if (!granted) launcher.launch(Manifest.permission.CAMERA)
+		}
+
+		if (granted) {
+			Camera(onBack = onBack)
+		} else {
+			Column(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(24.dp),
+				verticalArrangement = Arrangement.Center,
+				horizontalAlignment = Alignment.CenterHorizontally
+			) {
+				Text(
+					"AppleCare needs camera access to scan your apple leaves.",
+					textAlign = TextAlign.Center
+				)
+				Spacer(Modifier.height(16.dp))
+				Button(onClick = { launcher.launch(Manifest.permission.CAMERA) }) {
+					Text("Grant camera access")
+				}
+				TextButton(onClick = onBack) { Text("Back") }
+			}
+		}
+	}
+
+	private fun openAgrovetSearch() {
+		val uri = Uri.parse("geo:0,0?z=15&q=agrovet+near+me")
+		val mapsIntent = Intent(Intent.ACTION_VIEW, uri).setPackage("com.google.android.apps.maps")
+		try {
+			startActivity(mapsIntent)
+		} catch (e: ActivityNotFoundException) {
+			// Google Maps isn't installed: let any other map app handle it.
+			try {
+				startActivity(Intent(Intent.ACTION_VIEW, uri))
+			} catch (e: ActivityNotFoundException) {
+				Toast.makeText(this, "No maps app found", Toast.LENGTH_SHORT).show()
+			}
+		}
+	}
+
+	private fun hasPermission(permission: String) =
+		ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+
+	private fun hasLocationPermission() = LOCATION_PERMISSIONS.any(::hasPermission)
+
+	private fun loadLocation() {
+		if (!hasLocationPermission()) return
+		try {
+			fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+				location?.let(::resolveLocationName)
+			}
+		} catch (e: SecurityException) {
+			// Permission revoked between the check and the call; keep the default label.
+		}
+	}
+
+	private fun resolveLocationName(location: Location) {
+		if (!Geocoder.isPresent()) return
+		lifecycleScope.launch {
+			val name = withContext(Dispatchers.IO) {
+				runCatching {
+					@Suppress("DEPRECATION") // Blocking API is fine here: we're on Dispatchers.IO.
+					Geocoder(this@MainActivity, Locale.getDefault())
+						.getFromLocation(location.latitude, location.longitude, 1)
+						?.firstOrNull()
+						?.let { it.locality ?: it.subAdminArea ?: it.countryName }
+				}.getOrNull()
+			}
+			if (name != null) locationName = name
+		}
 	}
 
 	companion object {
-		val PERMISSIONS = arrayOf(
-			Manifest.permission.CAMERA,
+		private const val PREFS_NAME = "applecare_prefs"
+		private const val KEY_ONBOARDING_DONE = "onboarding_done"
+		private const val UNKNOWN_LOCATION = "Unknown Location"
+		private val LOCATION_PERMISSIONS = arrayOf(
 			Manifest.permission.ACCESS_COARSE_LOCATION,
 			Manifest.permission.ACCESS_FINE_LOCATION
 		)
 	}
-
 }

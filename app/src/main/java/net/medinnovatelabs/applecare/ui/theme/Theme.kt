@@ -1,4 +1,4 @@
-package com.example.compose
+package net.medinnovatelabs.applecare.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import net.medinnovatelabs.applecare.ui.theme.Typography
 
 
 private val LightColors = lightColorScheme(

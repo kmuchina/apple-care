@@ -1,24 +1,17 @@
 <resources>
     <string name="app_name">AppleCare</string>
-    <string name="forgot_password" translatable="false">Forgot Password</string>
     <string name="onboarding_text_1">Worried your plants are unhealthy?</string>
     <string name="onboarding_text_2">Just take a picture.</string>
     <string name="onboarding_text_3">We will scan the picture and give you diagnosis.</string>
     <string name="next">Next</string>
     <string name="skip">Skip</string>
-    <string name="onboard">Onboard</string>
-    <string name="login">Login</string>
-    <string name="signup">Sign Up</string>
-    <string name="more_info">More Info</string>
-    <string name="all_set">All Set</string>
-    <string name="main">Main</string>
     <string name="home">Home</string>
     <string name="history">History</string>
     <string name="camera">Camera</string>
     <string name="community">Community</string>
-    <string name="profile">Profile</string>
-    <string name="temp">%d\u2103</string>
-    <string name="web_client_id">466825647552-t2msg1jk7ck1gr87g9tls2ptfiii7aq8.apps.googleusercontent.com</string>
+    <string name="settings">Settings</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="temp">%d℃</string>
     <string name="search" />
     <string name="confidence">%.0f%%</string>
     <string name="brand">Apple Care</string>

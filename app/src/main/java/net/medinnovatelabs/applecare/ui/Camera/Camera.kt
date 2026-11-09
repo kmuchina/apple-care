@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -21,7 +23,6 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,11 +67,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.medinnovatelabs.applecare.R
+import kotlinx.coroutines.withContext
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
 import net.medinnovatelabs.applecare.utils.TensorFLowHelper
-import java.io.File
 import java.io.InputStream
 
 @ExperimentalMaterial3Api
@@ -82,10 +84,7 @@ fun Camera(
 	val context = LocalContext.current
 	val controller = remember {
 		LifecycleCameraController(context).apply {
-			setEnabledUseCases(
-				CameraController.IMAGE_CAPTURE or
-						CameraController.VIDEO_CAPTURE
-			)
+			setEnabledUseCases(CameraController.IMAGE_CAPTURE)
 		}
 	}
 	val scaffoldState = rememberBottomSheetScaffoldState()
@@ -97,24 +96,12 @@ fun Camera(
 	val galleryLauncher = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.GetContent(),
 		onResult = { uri ->
-			// Handle the selected image URI
-			uri?.let { selectedUri ->
-				val selectedBitmap = selectedUri.toBitmap(context.contentResolver)
-				selectedBitmap?.let { bitmap ->
-					// Use viewModel.onTakePhoto(bitmap) to handle the selected image
-					// viewModel.onTakePhoto(bitmap)
-					val scaledBitmap = Bitmap.createScaledBitmap(
-						selectedBitmap,
-						TensorFLowHelper.IMAGESIZE,
-						TensorFLowHelper.IMAGESIZE, false
-					);
-
-					TensorFLowHelper.classifyImage(scaledBitmap, context) {
-						scope.launch {
-							viewModel.onTakePhoto(it)
-						}
-					}
-				}
+			uri ?: return@rememberLauncherForActivityResult
+			scope.launch {
+				val bitmap = withContext(Dispatchers.IO) {
+					uri.toBitmap(context.contentResolver)
+				} ?: return@launch
+				classifyAndShow(bitmap, context, scope, viewModel)
 			}
 		}
 	)
@@ -171,21 +158,6 @@ fun Camera(
 						.background(
 							MaterialTheme.colorScheme.primary,
 							shape = CircleShape
-						)
-						.clickable( // Wrap Box with Clickable
-							onClick = {
-								Toast
-									.makeText(
-										context,
-										"Camera switching in 1...2..",
-										Toast.LENGTH_SHORT
-									)
-									.show()
-								controller.cameraSelector =
-									if (controller.cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
-										CameraSelector.DEFAULT_FRONT_CAMERA
-									} else CameraSelector.DEFAULT_BACK_CAMERA
-							}
 						),
 					onClick = {
 						Toast.makeText(
@@ -224,18 +196,6 @@ fun Camera(
 						.background(
 							MaterialTheme.colorScheme.primary,
 							shape = CircleShape
-						)
-						.clickable(
-							onClick = {
-								Toast
-									.makeText(
-										context,
-										"A moment please...🫸🏾...Opening your Gallery...📸",
-										Toast.LENGTH_SHORT
-									)
-									.show()
-								galleryLauncher.launch("image/*")
-							}
 						),
 					onClick = {
 						// Open gallery when clicked
@@ -268,10 +228,8 @@ fun Camera(
 							takePhoto(
 								controller = controller,
 								context = context,
-								onPhotoTaken = {
-									scope.launch {
-										viewModel.onTakePhoto(it)
-									}
+								onPhotoTaken = { bitmap ->
+									classifyAndShow(bitmap, context, scope, viewModel)
 								}
 							)
 						} else {
@@ -359,13 +317,35 @@ fun PhotoBottomSheetContent(
 }
 
 
+/**
+ * Scales [bitmap] to the model input size and classifies it off the main thread,
+ * then hands the result to the ViewModel (which also persists it).
+ */
+private fun classifyAndShow(
+	bitmap: Bitmap,
+	context: Context,
+	scope: CoroutineScope,
+	viewModel: CameraViewModel
+) {
+	scope.launch {
+		val classified: ClassifiedImage = withContext(Dispatchers.Default) {
+			val scaled = Bitmap.createScaledBitmap(
+				bitmap,
+				TensorFLowHelper.IMAGESIZE,
+				TensorFLowHelper.IMAGESIZE,
+				false
+			)
+			TensorFLowHelper.classifyImage(scaled, context.applicationContext)
+		}
+		viewModel.onTakePhoto(classified)
+	}
+}
+
 private fun takePhoto(
 	controller: LifecycleCameraController,
 	context: Context,
-	onPhotoTaken: (ClassifiedImage) -> Unit
+	onPhotoTaken: (Bitmap) -> Unit
 ) {
-	val cameraSelector = CameraSelector.Builder().build()
-
 	controller.takePicture(
 		ContextCompat.getMainExecutor(context),
 		object : ImageCapture.OnImageCapturedCallback() {
@@ -373,27 +353,19 @@ private fun takePhoto(
 			override fun onCaptureSuccess(image: ImageProxy) {
 				super.onCaptureSuccess(image)
 
+				// Read everything we need from the ImageProxy *before* closing it.
+				val rotationDegrees = image.imageInfo.rotationDegrees
 				val bitmap = image.toBitmap()
 				image.close()
 
-				val rotationDegrees = image.imageInfo.rotationDegrees
 				val rotatedBitmap = rotateBitmap(bitmap, rotationDegrees)
 
 				savePhotoToGallery(context, rotatedBitmap)
 
-				// Show toast message
 				Toast.makeText(context, "Photo captured successfully...🍏...🎉🎉", Toast.LENGTH_SHORT)
 					.show()
 
-				val scaledBitmap = Bitmap.createScaledBitmap(
-					rotatedBitmap,
-					TensorFLowHelper.IMAGESIZE,
-					TensorFLowHelper.IMAGESIZE, false
-				);
-
-				TensorFLowHelper.classifyImage(scaledBitmap, context) {
-					onPhotoTaken(it)
-				}
+				onPhotoTaken(rotatedBitmap)
 			}
 
 			override fun onError(exception: ImageCaptureException) {
@@ -412,35 +384,29 @@ private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
 }
 
 private fun savePhotoToGallery(context: Context, bitmap: Bitmap) {
+	// Before Android 10, writing to the shared gallery needs WRITE_EXTERNAL_STORAGE,
+	// which this app doesn't request. Skip saving there instead of crashing.
+	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+
 	val contentValues = ContentValues().apply {
+		put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/AppleCare")
 		put(MediaStore.Images.Media.DISPLAY_NAME, "CapturedPhoto_${System.currentTimeMillis()}")
 		put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
 		put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis() / 1000)
 		put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
 	}
 
-	val uri = context.contentResolver.insert(
-		MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-		contentValues
-	)
-
-	uri?.let { uri ->
-		try {
-			context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-				bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-			}
-		} catch (e: Exception) {
-			Log.e("Camera", "Error saving photo to gallery: ${e.message}", e)
+	try {
+		val uri = context.contentResolver.insert(
+			MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+			contentValues
+		) ?: return
+		context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
 		}
+	} catch (e: Exception) {
+		Log.e("Camera", "Error saving photo to gallery: ${e.message}", e)
 	}
-}
-
-private fun getOutputDirectory(context: Context): File {
-	val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-		File(it, context.getString(R.string.app_name)).apply { mkdirs() }
-	}
-	return if (mediaDir != null && mediaDir.exists())
-		mediaDir else context.filesDir
 }
 
 fun Uri.toBitmap(contentResolver: ContentResolver): Bitmap? {

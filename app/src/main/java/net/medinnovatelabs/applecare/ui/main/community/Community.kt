@@ -238,7 +238,10 @@ fun PostCard(
 
 				Spacer(modifier = Modifier.width(8.dp))
 				Column {
-					Text(text = post.userName!!, fontSize = 16.sp)
+					Text(
+						text = post.userName ?: stringResource(R.string.anonymous),
+						fontSize = 16.sp
+					)
 					Text(
 						text = post.postTime,
 						fontSize = 14.sp, color = Color.Gray

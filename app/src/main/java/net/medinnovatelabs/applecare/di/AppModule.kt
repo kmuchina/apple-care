@@ -1,7 +1,6 @@
 package net.medinnovatelabs.applecare.di
 
 import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,8 +13,6 @@ import net.medinnovatelabs.applecare.data.ClassifiedImageRepositoryImpl
 import net.medinnovatelabs.applecare.data.CommunityPostDao
 import net.medinnovatelabs.applecare.data.CommunityPostRepository
 import net.medinnovatelabs.applecare.data.CommunityPostRepositoryImpl
-import net.medinnovatelabs.applecare.firebasedata.AuthRepository
-import net.medinnovatelabs.applecare.firebasedata.AuthRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -26,16 +23,6 @@ object AppModule {
 	@Singleton
 	fun providesAppleCareDatabase(@ApplicationContext context: Context): AppleCareDatabase {
 		return AppleCareDatabase.getDatabase(context)
-	}
-
-	@Provides
-	@Singleton
-	fun providesFirebaseAuth() = FirebaseAuth.getInstance()
-
-	@Provides
-	@Singleton
-	fun providesRepositoryImpl(firebaseAuth: FirebaseAuth): AuthRepository {
-		return AuthRepositoryImpl(firebaseAuth)
 	}
 
 	@Provides
@@ -61,5 +48,3 @@ object AppModule {
 	}
 
 }
-
-//https://chat.whatsapp.com/DtWoGm2OXRVD576aidnnW6

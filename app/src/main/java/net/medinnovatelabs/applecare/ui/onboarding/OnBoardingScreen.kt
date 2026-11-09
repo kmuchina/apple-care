@@ -1,4 +1,4 @@
-package net.medinnovatelabs.applecare.ui.authentication
+package net.medinnovatelabs.applecare.ui.onboarding
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image

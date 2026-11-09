@@ -1,7 +1,6 @@
 plugins {
 	alias(libs.plugins.androidApplication)
 	alias(libs.plugins.jetbrainsKotlinAndroid)
-	id("com.google.gms.google-services")
 	id("dagger.hilt.android.plugin")
 	id("com.google.devtools.ksp")
 }
@@ -55,8 +54,6 @@ android {
 
 dependencies {
 
-	// Add the dependency for the Google Play services library
-	implementation("com.google.android.gms:play-services-auth:21.0.0")
 	implementation(libs.play.services.location)
 
 	// navigation
@@ -70,7 +67,6 @@ dependencies {
 	implementation("androidx.camera:camera-lifecycle:1.3.1")
 	implementation("androidx.camera:camera-view:1.3.1")
 	implementation("androidx.camera:camera-extensions:1.3.1")
-	implementation("io.github.microutils:kotlin-logging:2.0.6")
 
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -86,18 +82,13 @@ dependencies {
 	// Room
 	implementation(libs.room.runtime)
 	implementation(libs.room.ktx)
-	implementation(libs.firebase.crashlytics.buildtools)
 	ksp(libs.room.compiler)
 
-	implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
-	implementation("com.google.firebase:firebase-analytics")
 	implementation(libs.tensorflow.lite.support)
 	implementation(libs.tensorflow.lite.metadata)
 	implementation(libs.tensorflow.lite.gpu)
 
 	implementation("com.google.dagger:hilt-android:2.48")
-	implementation(libs.firebase.auth.ktx)
-	implementation(libs.firebase.auth)
 	implementation(libs.androidx.lifecycle.runtime.compose)
 	ksp("com.google.dagger:hilt-android-compiler:2.48")
 

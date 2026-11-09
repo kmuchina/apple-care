@@ -29,10 +29,6 @@ fun Guide(guideNo: Int, onBack: () -> Unit) {
 	Scaffold(
 		topBar = { GuideTopAppBar(onBack = onBack) }
 	) { innerPadding ->
-		val bottomPadding = innerPadding.calculateBottomPadding()
-
-		Text(guideNo.toString())
-
 		Surface(
 			modifier = Modifier.padding(innerPadding)
 		) {

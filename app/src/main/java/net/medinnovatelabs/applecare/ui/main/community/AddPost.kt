@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.data.models.CommunityPost
-import net.medinnovatelabs.applecare.firebasedata.UserData
 import net.medinnovatelabs.applecare.ui.Camera.toBitmap
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertBitmapToString
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertStringToBitmap
@@ -77,7 +76,6 @@ fun AddPostTopAppBar(
 fun AddPost(
 	onBack: () -> Unit,
 	modifier: Modifier = Modifier,
-	userData: UserData?,
 	viewModel: CommunityViewModel = hiltViewModel()
 ) {
 	Scaffold(
@@ -167,8 +165,8 @@ fun AddPost(
 			val formattedDate = date.format(formatter)
 
 			val cp = CommunityPost(
-				userPicture = userData?.profilePictureUrl,
-				userName = userData?.username,
+				userPicture = null,
+				userName = null,
 				postTime = formattedDate,
 				postPicture = image ?: "",
 				title = title,
@@ -195,5 +193,5 @@ fun AddPost(
 @Preview
 @Composable
 fun AddPostPreview() {
-	AddPost(onBack = {}, userData = null)
+	AddPost(onBack = {})
 }
