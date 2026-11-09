@@ -23,10 +23,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,15 +40,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
-import net.medinnovatelabs.applecare.ui.Camera.CameraViewModel
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertStringToBitmap
 
 @Composable
-fun History(viewModel: CameraViewModel = hiltViewModel()) {
-	val classifiedImages = viewModel.classifiedImages.collectAsState().value
+fun History(viewModel: HistoryViewModel = hiltViewModel()) {
+	val classifiedImages = viewModel.classifiedImages.collectAsStateWithLifecycle().value
 	val textState = remember {
 		mutableStateOf(TextFieldValue(""))
 	}
@@ -57,7 +54,6 @@ fun History(viewModel: CameraViewModel = hiltViewModel()) {
 	val filteredClassifiedImages = classifiedImages.filter {
 		it.label.contains(searchedText, ignoreCase = true)
 	}
-	val scope = rememberCoroutineScope()
 
 	Column(
 		modifier = Modifier
@@ -70,15 +66,8 @@ fun History(viewModel: CameraViewModel = hiltViewModel()) {
 		Spacer(modifier = Modifier.height(20.dp))
 
 		LazyColumn() {
-			items(items = filteredClassifiedImages) { it ->
-				HistoryCards(
-					it,
-					onDelete = {
-						scope.launch {
-							viewModel.onDelete(it)
-						}
-					}
-				)
+			items(items = filteredClassifiedImages, key = { it.id }) { image ->
+				HistoryCards(image, onDelete = viewModel::delete)
 				Spacer(modifier = Modifier.height(16.dp))
 			}
 
@@ -92,7 +81,10 @@ fun HistoryCards(
 	classifiedImage: ClassifiedImage,
 	onDelete: (ClassifiedImage) -> Unit
 ) {
-	val bitmap = convertStringToBitmap(classifiedImage.name)
+	// Decoding Base64 + JPEG is expensive; don't redo it on every recomposition.
+	val bitmap = remember(classifiedImage.name) {
+		convertStringToBitmap(classifiedImage.name).asImageBitmap()
+	}
 	OutlinedCard(
 		modifier = Modifier
 			.fillMaxWidth(),
@@ -105,7 +97,7 @@ fun HistoryCards(
 				.padding(10.dp), verticalAlignment = Alignment.CenterVertically
 		) {
 			Image(
-				bitmap.asImageBitmap(),
+				bitmap,
 				contentDescription = classifiedImage.label,
 				modifier = Modifier
 					.size(150.dp)
@@ -187,6 +179,6 @@ fun SearchBar(state: MutableState<TextFieldValue>) {
 
 @Preview
 @Composable
-fun HistoryPreview() {
-	History()
+fun SearchBarPreview() {
+	SearchBar(state = remember { mutableStateOf(TextFieldValue("")) })
 }

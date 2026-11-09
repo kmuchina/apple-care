@@ -13,7 +13,9 @@ interface CommunityPostDao {
 	@Insert(onConflict = OnConflictStrategy.IGNORE)
 	suspend fun insert(communityPost: CommunityPost)
 
-	@Query("SELECT * FROM community_posts ORDER BY postTime ASC")
+	// postTime is a dd/MM/yyyy string, which doesn't sort chronologically; the auto-generated
+	// id does, so order by it to show the newest posts first.
+	@Query("SELECT * FROM community_posts ORDER BY id DESC")
 	fun getAllCommunityPosts(): Flow<List<CommunityPost>>
 
 	@Delete

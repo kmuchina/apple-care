@@ -4,6 +4,7 @@ plugins {
 	alias(libs.plugins.kotlin.compose)
 	alias(libs.plugins.ksp)
 	alias(libs.plugins.hilt)
+	alias(libs.plugins.room)
 }
 
 android {
@@ -44,6 +45,11 @@ android {
 			excludes += "/META-INF/{AL2.0,LGPL2.1}"
 		}
 	}
+}
+
+room {
+	// Exported schemas (commit them) let future DB changes ship as tested migrations.
+	schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

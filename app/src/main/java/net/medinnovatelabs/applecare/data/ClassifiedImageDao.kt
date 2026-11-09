@@ -13,7 +13,7 @@ interface ClassifiedImageDao {
 	@Insert(onConflict = OnConflictStrategy.IGNORE)
 	suspend fun insert(classifiedImage: ClassifiedImage)
 
-	@Query("SELECT * FROM classified_images ORDER BY id ASC")
+	@Query("SELECT * FROM classified_images ORDER BY id DESC")
 	fun getAllClassifiedImages(): Flow<List<ClassifiedImage>>
 
 	@Delete

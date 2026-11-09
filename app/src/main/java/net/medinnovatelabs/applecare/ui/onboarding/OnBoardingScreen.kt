@@ -1,6 +1,11 @@
 package net.medinnovatelabs.applecare.ui.onboarding
 
+import android.app.Activity
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +42,19 @@ import net.medinnovatelabs.applecare.R
 fun OnBoardingScreen(
 	onSkip: () -> Unit
 ) {
-	var result = remember { mutableIntStateOf(0) }
+	val result = remember { mutableIntStateOf(0) }
+
+	// The rest of the app has green top bars with light status bar icons; this screen has a
+	// plain background, so use dark icons in light mode while it is shown.
+	val view = LocalView.current
+	val darkTheme = isSystemInDarkTheme()
+	if (!view.isInEditMode) {
+		DisposableEffect(darkTheme) {
+			val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
+			controller.isAppearanceLightStatusBars = !darkTheme
+			onDispose { controller.isAppearanceLightStatusBars = darkTheme }
+		}
+	}
 
 	val imageResource = when (result.intValue) {
 		0 -> R.drawable.onboarding_vector_1

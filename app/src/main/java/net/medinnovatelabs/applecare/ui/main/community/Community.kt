@@ -38,11 +38,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +56,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.data.models.CommunityPost
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertStringToBitmap
@@ -164,7 +162,7 @@ fun SearchBar() {
 fun Community(
 	viewModel: CommunityViewModel = hiltViewModel()
 ) {
-	val communityPosts = viewModel.communityPosts.collectAsState().value
+	val communityPosts = viewModel.communityPosts.collectAsStateWithLifecycle().value
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
@@ -173,11 +171,8 @@ fun Community(
 	) {
 		SearchBar()
 		LazyColumn() {
-			items(items = communityPosts) { post ->
-				PostCard(
-					post,
-					viewModel
-				)
+			items(items = communityPosts, key = { it.id }) { post ->
+				PostCard(post, onDelete = viewModel::deletePost)
 				Spacer(modifier = Modifier.height(16.dp))
 			}
 		}
@@ -187,31 +182,35 @@ fun Community(
 @Composable
 fun PostCard(
 	post: CommunityPost,
-	viewModel: CommunityViewModel
+	onDelete: (CommunityPost) -> Unit
 ) {
+	// Decode once per post, not on every recomposition. Posts without a photo store "".
+	val picture = remember(post.postPicture) {
+		post.postPicture.takeIf { it.isNotEmpty() }
+			?.let { convertStringToBitmap(it).asImageBitmap() }
+	}
+	// Height wraps the content, so long posts are no longer cut off by a fixed 330dp card.
 	OutlinedCard(
 		modifier = Modifier
-			.fillMaxWidth()
-			.height(330.dp),
+			.fillMaxWidth(),
 		shape = RoundedCornerShape(16.dp),
 		border = BorderStroke(1.dp, Color.Black)
 	) {
 		Column(
-			modifier = Modifier
-				.padding(16.dp)
-				.fillMaxSize()
+			modifier = Modifier.padding(16.dp)
 		) {
-			// Top Image
-			Image(
-				bitmap = convertStringToBitmap(post.postPicture).asImageBitmap(),
-				contentDescription = null,
-				contentScale = ContentScale.Crop,
-				modifier = Modifier
-					.fillMaxWidth()
-					.height(128.dp)
-					.clip(RoundedCornerShape(16.dp))
-			)
-			Spacer(modifier = Modifier.height(8.dp))
+			picture?.let {
+				Image(
+					bitmap = it,
+					contentDescription = null,
+					contentScale = ContentScale.Crop,
+					modifier = Modifier
+						.fillMaxWidth()
+						.height(128.dp)
+						.clip(RoundedCornerShape(16.dp))
+				)
+				Spacer(modifier = Modifier.height(8.dp))
+			}
 			// Profile Section
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				Icon(
@@ -269,7 +268,6 @@ fun PostCard(
 					}
 
 					var expanded by remember { mutableStateOf(false) }
-					val coroutineScope = rememberCoroutineScope()
 
 
 					IconButton(onClick = { expanded = !expanded }) {
@@ -293,9 +291,8 @@ fun PostCard(
 							DropdownMenuItem(
 								text = { androidx.compose.material3.Text("Delete") },
 								onClick = {
-									coroutineScope.launch {
-										viewModel.deletePost(post)
-									}
+									expanded = false
+									onDelete(post)
 								},
 							)
 						}

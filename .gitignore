@@ -1,17 +1,19 @@
 *.iml
 .gradle
+.kotlin/
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.idea/copilot
+local.properties
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
+
+# IDE settings are per-machine; only share code style and inspection profiles.
+/.idea/*
+!/.idea/codeStyles/
+!/.idea/inspectionProfiles/
+/app/.idea/
+
+# Firebase config (not used by this app any more; never commit one)
 google-services.json

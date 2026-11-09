@@ -88,6 +88,7 @@ fun Camera(
 	val scaffoldState = rememberBottomSheetScaffoldState()
 	val scope = rememberCoroutineScope()
 	val bitmap by viewModel.bitmaps.collectAsState()
+	val label by viewModel.label.collectAsState()
 	val sheetPeekHeight by viewModel.sheetPeekHeight.collectAsState()
 	val modelError by viewModel.modelError.collectAsState()
 
@@ -141,7 +142,7 @@ fun Camera(
 		},
 		sheetContent = {
 			bitmap?.let {
-				PhotoBottomSheetContent(bitmap = it, label = viewModel.label.value) {
+				PhotoBottomSheetContent(bitmap = it, label = label) {
 					viewModel.reset()
 				}
 			}

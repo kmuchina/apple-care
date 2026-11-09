@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
@@ -40,6 +39,14 @@ import net.medinnovatelabs.applecare.data.models.CommunityPost
 import net.medinnovatelabs.applecare.ui.Camera.toBitmap
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertBitmapToString
 import net.medinnovatelabs.applecare.utils.BitmapConverter.convertStringToBitmap
+import net.medinnovatelabs.applecare.utils.BitmapConverter.downscale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.saveable.rememberSaveable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -83,26 +90,35 @@ fun AddPost(
 	) { innerPadding ->
 
 		val context = LocalContext.current
+		val scope = rememberCoroutineScope()
 
-		var title by remember { mutableStateOf("") }
-		var content by remember { mutableStateOf("") }
+		var title by rememberSaveable { mutableStateOf("") }
+		var content by rememberSaveable { mutableStateOf("") }
 		var image: String? by remember { mutableStateOf(null) }
+		val imagePreview = remember(image) { image?.let { convertStringToBitmap(it).asImageBitmap() } }
 
 		val galleryLauncher = rememberLauncherForActivityResult(
 			contract = ActivityResultContracts.GetContent(),
 			onResult = { uri ->
-				// Handle the selected image URI
-				uri?.let { selectedUri ->
-					val bitmap = selectedUri.toBitmap(context.contentResolver)
-					if (bitmap != null) image = convertBitmapToString(bitmap)
+				uri ?: return@rememberLauncherForActivityResult
+				scope.launch {
+					image = withContext(Dispatchers.IO) {
+						uri.toBitmap(context.contentResolver)
+							// Full-size photos as Base64 overflow SQLite's ~2 MB row limit
+							// and crash the community feed when it is read back.
+							?.let { downscale(it, MAX_POST_IMAGE_SIZE) }
+							?.let(::convertBitmapToString)
+					} ?: image
 				}
 			}
 		)
 
-
 		Column(
 			modifier = modifier
 				.padding(innerPadding)
+				.consumeWindowInsets(innerPadding)
+				.imePadding()
+				.verticalScroll(rememberScrollState())
 				.padding(horizontal = 20.dp)
 		) {
 			Spacer(modifier = Modifier.height(20.dp))
@@ -120,10 +136,9 @@ fun AddPost(
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			image?.let {
-				val bitmap = convertStringToBitmap(it)
+			imagePreview?.let {
 				Image(
-					bitmap.asImageBitmap(),
+					it,
 					"Uploaded Image",
 					modifier = Modifier
 						.fillMaxWidth()
@@ -160,26 +175,21 @@ fun AddPost(
 				Spacer(modifier = Modifier.height(16.dp))
 			}
 
-			val date = LocalDate.now()
-			val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH)
-			val formattedDate = date.format(formatter)
-
-			val cp = CommunityPost(
-				userPicture = null,
-				userName = null,
-				postTime = formattedDate,
-				postPicture = image ?: "",
-				title = title,
-				content = content,
-			)
-
-			val coroutineScope = rememberCoroutineScope()
-
 			Button(
+				enabled = title.isNotBlank() && content.isNotBlank(),
 				onClick = {
-					coroutineScope.launch {
-						viewModel.addPost(cp)
-					}
+					viewModel.addPost(
+						CommunityPost(
+							userPicture = null,
+							userName = null,
+							postTime = LocalDate.now().format(
+								DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH)
+							),
+							postPicture = image ?: "",
+							title = title.trim(),
+							content = content.trim(),
+						)
+					)
 					onBack()
 				},
 				modifier = Modifier.fillMaxWidth()
@@ -190,8 +200,4 @@ fun AddPost(
 	}
 }
 
-@Preview
-@Composable
-fun AddPostPreview() {
-	AddPost(onBack = {})
-}
+private const val MAX_POST_IMAGE_SIZE = 1024

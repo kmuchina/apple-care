@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
 import net.medinnovatelabs.applecare.data.models.CommunityPost
 
-@Database(entities = [ClassifiedImage::class, CommunityPost::class], version = 1, exportSchema = false)
+@Database(entities = [ClassifiedImage::class, CommunityPost::class], version = 1, exportSchema = true)
 abstract class AppleCareDatabase : RoomDatabase() {
 	abstract fun classifiedImageDao(): ClassifiedImageDao
 	abstract fun communityPostDao(): CommunityPostDao

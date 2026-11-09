@@ -14,6 +14,19 @@ object BitmapConverter {
 		return Base64.encodeToString(byteArray, Base64.NO_WRAP)
 	}
 
+	/** Scales [bitmap] down so its longest side is at most [maxSize] px (never scales up). */
+	fun downscale(bitmap: Bitmap, maxSize: Int): Bitmap {
+		val longest = maxOf(bitmap.width, bitmap.height)
+		if (longest <= maxSize) return bitmap
+		val ratio = maxSize.toFloat() / longest
+		return Bitmap.createScaledBitmap(
+			bitmap,
+			(bitmap.width * ratio).toInt().coerceAtLeast(1),
+			(bitmap.height * ratio).toInt().coerceAtLeast(1),
+			true
+		)
+	}
+
 	fun convertStringToBitmap(encodedString: String): Bitmap {
 		return try {
 			val encodeByte = Base64.decode(encodedString, Base64.DEFAULT)

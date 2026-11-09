@@ -14,9 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.data.ClassifiedImageRepository
 import net.medinnovatelabs.applecare.data.models.ClassifiedImage
@@ -47,13 +45,6 @@ class CameraViewModel @Inject constructor(
 	/** Non-null when the model couldn't be loaded or run. */
 	private val _modelError = MutableStateFlow<String?>(null)
 	val modelError = _modelError.asStateFlow()
-
-	val classifiedImages = classifiedImageRepository.getClassifiedImages()
-		.stateIn(
-			scope = viewModelScope,
-			started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-			initialValue = emptyList()
-		)
 
 	// One single-thread executor owns the model: it is created, run and closed only here.
 	// This scope is separate from viewModelScope, which is already cancelled when
@@ -117,10 +108,11 @@ class CameraViewModel @Inject constructor(
 	}
 
 	private fun showResult(classifiedImage: ClassifiedImage) {
-		_sheetPeekHeight.value = 500
-		_bitmap.value = convertStringToBitmap(classifiedImage.name)
+		// Set the label before the bitmap: the sheet appears when the bitmap becomes non-null.
 		_label.value = classifiedImage.label
 		_confidence.value = classifiedImage.confidence
+		_bitmap.value = convertStringToBitmap(classifiedImage.name)
+		_sheetPeekHeight.value = 500
 
 		viewModelScope.launch {
 			classifiedImageRepository.insertClassifiedImage(classifiedImage)
@@ -129,10 +121,6 @@ class CameraViewModel @Inject constructor(
 
 	fun clearModelError() {
 		_modelError.value = null
-	}
-
-	suspend fun onDelete(classifiedImage: ClassifiedImage) {
-		classifiedImageRepository.deleteClassifiedImage(classifiedImage)
 	}
 
 	fun reset() {
@@ -151,6 +139,5 @@ class CameraViewModel @Inject constructor(
 
 	companion object {
 		private const val TAG = "CameraViewModel"
-		private const val TIMEOUT_MILLIS = 5_000L
 	}
 }
