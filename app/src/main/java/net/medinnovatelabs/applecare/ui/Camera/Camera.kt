@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,18 +62,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.CoroutineScope
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.medinnovatelabs.applecare.data.models.ClassifiedImage
-import net.medinnovatelabs.applecare.utils.TensorFLowHelper
 import java.io.InputStream
 
 @ExperimentalMaterial3Api
@@ -91,6 +89,14 @@ fun Camera(
 	val scope = rememberCoroutineScope()
 	val bitmap by viewModel.bitmaps.collectAsState()
 	val sheetPeekHeight by viewModel.sheetPeekHeight.collectAsState()
+	val modelError by viewModel.modelError.collectAsState()
+
+	LaunchedEffect(modelError) {
+		modelError?.let {
+			Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+			viewModel.clearModelError()
+		}
+	}
 
 	// ActivityResultLauncher for handling gallery opening and result
 	val galleryLauncher = rememberLauncherForActivityResult(
@@ -101,7 +107,7 @@ fun Camera(
 				val bitmap = withContext(Dispatchers.IO) {
 					uri.toBitmap(context.contentResolver)
 				} ?: return@launch
-				classifyAndShow(bitmap, context, scope, viewModel)
+				viewModel.classify(bitmap)
 			}
 		}
 	)
@@ -126,7 +132,7 @@ fun Camera(
 						color = MaterialTheme.colorScheme.onPrimary
 					)
 				},
-				colors = TopAppBarDefaults.mediumTopAppBarColors(
+				colors = TopAppBarDefaults.topAppBarColors(
 					containerColor = MaterialTheme.colorScheme.primary,
 					titleContentColor = MaterialTheme.colorScheme.onPrimary,
 					navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
@@ -228,9 +234,7 @@ fun Camera(
 							takePhoto(
 								controller = controller,
 								context = context,
-								onPhotoTaken = { bitmap ->
-									classifyAndShow(bitmap, context, scope, viewModel)
-								}
+								onPhotoTaken = viewModel::classify
 							)
 						} else {
 							takePhoto = true
@@ -316,30 +320,6 @@ fun PhotoBottomSheetContent(
 	}
 }
 
-
-/**
- * Scales [bitmap] to the model input size and classifies it off the main thread,
- * then hands the result to the ViewModel (which also persists it).
- */
-private fun classifyAndShow(
-	bitmap: Bitmap,
-	context: Context,
-	scope: CoroutineScope,
-	viewModel: CameraViewModel
-) {
-	scope.launch {
-		val classified: ClassifiedImage = withContext(Dispatchers.Default) {
-			val scaled = Bitmap.createScaledBitmap(
-				bitmap,
-				TensorFLowHelper.IMAGESIZE,
-				TensorFLowHelper.IMAGESIZE,
-				false
-			)
-			TensorFLowHelper.classifyImage(scaled, context.applicationContext)
-		}
-		viewModel.onTakePhoto(classified)
-	}
-}
 
 private fun takePhoto(
 	controller: LifecycleCameraController,

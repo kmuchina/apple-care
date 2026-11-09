@@ -18,11 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
@@ -35,6 +32,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -56,8 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.R
 import net.medinnovatelabs.applecare.data.models.CommunityPost
@@ -80,7 +79,7 @@ fun CommunityTopAppBar(
 				color = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
 			)
 		},
-		colors = TopAppBarDefaults.mediumTopAppBarColors(
+		colors = TopAppBarDefaults.topAppBarColors(
 			containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
 			titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
 			navigationIconContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary
@@ -140,7 +139,7 @@ fun SearchBar() {
 				)
 			},
 			shape = RoundedCornerShape(16.dp),
-			colors = TextFieldDefaults.outlinedTextFieldColors(
+			colors = OutlinedTextFieldDefaults.colors(
 				focusedBorderColor = Color.Black,
 				unfocusedBorderColor = Color.Black
 			)
@@ -161,7 +160,6 @@ fun SearchBar() {
 	}
 }
 
-@Preview
 @Composable
 fun Community(
 	viewModel: CommunityViewModel = hiltViewModel()
@@ -216,25 +214,13 @@ fun PostCard(
 			Spacer(modifier = Modifier.height(8.dp))
 			// Profile Section
 			Row(verticalAlignment = Alignment.CenterVertically) {
-				if (post.userPicture != null) {
-					AsyncImage(
-						model = post.userPicture,
-						contentDescription = "Profile picture",
-						modifier = Modifier
-							.size(40.dp)
-							.clip(CircleShape),
-						contentScale = ContentScale.Crop
-					)
-					Spacer(modifier = Modifier.height(16.dp))
-				} else {
-					Icon(
-						Icons.Rounded.Person,
-						"null",
-						modifier = Modifier
-							.size(40.dp)
-							.clip(CircleShape)
-					)
-				}
+				Icon(
+					Icons.Rounded.Person,
+					contentDescription = null,
+					modifier = Modifier
+						.size(40.dp)
+						.clip(CircleShape)
+				)
 
 				Spacer(modifier = Modifier.width(8.dp))
 				Column {
@@ -272,7 +258,7 @@ fun PostCard(
 
 			) {
 				IconButton(onClick = { /* Handle comment */ }) {
-					Icon(imageVector = Icons.Default.Comment, contentDescription = "Comment")
+					Icon(imageVector = Icons.AutoMirrored.Filled.Comment, contentDescription = "Comment")
 				}
 				Row {
 					IconButton(onClick = { /* Handle like */ }) {

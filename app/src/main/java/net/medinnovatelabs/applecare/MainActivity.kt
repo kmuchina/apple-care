@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -77,6 +78,7 @@ class MainActivity : ComponentActivity() {
 
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
+		enableEdgeToEdge()
 		super.onCreate(savedInstanceState)
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -183,11 +185,11 @@ class MainActivity : ComponentActivity() {
 		val mapsIntent = Intent(Intent.ACTION_VIEW, uri).setPackage("com.google.android.apps.maps")
 		try {
 			startActivity(mapsIntent)
-		} catch (e: ActivityNotFoundException) {
+		} catch (_: ActivityNotFoundException) {
 			// Google Maps isn't installed: let any other map app handle it.
 			try {
 				startActivity(Intent(Intent.ACTION_VIEW, uri))
-			} catch (e: ActivityNotFoundException) {
+			} catch (_: ActivityNotFoundException) {
 				Toast.makeText(this, "No maps app found", Toast.LENGTH_SHORT).show()
 			}
 		}
@@ -204,7 +206,7 @@ class MainActivity : ComponentActivity() {
 			fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 				location?.let(::resolveLocationName)
 			}
-		} catch (e: SecurityException) {
+		} catch (_: SecurityException) {
 			// Permission revoked between the check and the call; keep the default label.
 		}
 	}

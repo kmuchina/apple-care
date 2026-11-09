@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import net.medinnovatelabs.applecare.data.models.CommunityPost
 import net.medinnovatelabs.applecare.ui.Camera.toBitmap
@@ -64,7 +64,7 @@ fun AddPostTopAppBar(
 				color = MaterialTheme.colorScheme.onPrimary
 			)
 		},
-		colors = TopAppBarDefaults.mediumTopAppBarColors(
+		colors = TopAppBarDefaults.topAppBarColors(
 			containerColor = MaterialTheme.colorScheme.primary,
 			titleContentColor = MaterialTheme.colorScheme.onPrimary,
 			navigationIconContentColor = MaterialTheme.colorScheme.onPrimary

@@ -1,18 +1,19 @@
 plugins {
-	alias(libs.plugins.androidApplication)
-	alias(libs.plugins.jetbrainsKotlinAndroid)
-	id("dagger.hilt.android.plugin")
-	id("com.google.devtools.ksp")
+	alias(libs.plugins.android.application)
+	// Kotlin is built into AGP 9; only the Compose compiler plugin is needed.
+	alias(libs.plugins.kotlin.compose)
+	alias(libs.plugins.ksp)
+	alias(libs.plugins.hilt)
 }
 
 android {
 	namespace = "net.medinnovatelabs.applecare"
-	compileSdk = 34
+	compileSdk = 37
 
 	defaultConfig {
 		applicationId = "net.medinnovatelabs.applecare"
 		minSdk = 27
-		targetSdk = 34
+		targetSdk = 36
 		versionCode = 1
 		versionName = "1.0"
 
@@ -32,18 +33,11 @@ android {
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
-	}
-	kotlinOptions {
-		jvmTarget = "1.8"
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
 	}
 	buildFeatures {
 		compose = true
-		mlModelBinding = true
-	}
-	composeOptions {
-		kotlinCompilerExtensionVersion = "1.5.1"
 	}
 	packaging {
 		resources {
@@ -53,60 +47,46 @@ android {
 }
 
 dependencies {
-
-	implementation(libs.play.services.location)
-
-	// navigation
-	implementation(libs.androidx.navigation.fragment.ktx)
-	implementation(libs.androidx.navigation.ui.ktx)
-	implementation(libs.navigation.compose)
-
-	//Camera
-	implementation("androidx.camera:camera-camera2:1.3.2")
-	implementation("androidx.camera:camera-core:1.3.1")
-	implementation("androidx.camera:camera-lifecycle:1.3.1")
-	implementation("androidx.camera:camera-view:1.3.1")
-	implementation("androidx.camera:camera-extensions:1.3.1")
-
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
+	implementation(libs.androidx.lifecycle.runtime.compose)
 	implementation(libs.androidx.activity.compose)
+	implementation(libs.androidx.navigation.compose)
+
+	// Compose
 	implementation(platform(libs.androidx.compose.bom))
 	implementation(libs.androidx.ui)
 	implementation(libs.androidx.ui.graphics)
 	implementation(libs.androidx.ui.tooling.preview)
-	implementation("androidx.compose.material3:material3")
-	implementation("io.coil-kt:coil-compose:2.6.0")
-	implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
+	implementation(libs.androidx.material3)
+	implementation(libs.androidx.material.icons.extended)
+
+	// Camera
+	implementation(libs.androidx.camera.camera2)
+	implementation(libs.androidx.camera.lifecycle)
+	implementation(libs.androidx.camera.view)
 
 	// Room
-	implementation(libs.room.runtime)
-	implementation(libs.room.ktx)
-	ksp(libs.room.compiler)
+	implementation(libs.androidx.room.runtime)
+	implementation(libs.androidx.room.ktx)
+	ksp(libs.androidx.room.compiler)
 
-	implementation(libs.tensorflow.lite.support)
-	implementation(libs.tensorflow.lite.metadata)
-	implementation(libs.tensorflow.lite.gpu)
+	// Hilt
+	implementation(libs.hilt.android)
+	ksp(libs.hilt.compiler)
+	implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 
-	implementation("com.google.dagger:hilt-android:2.48")
-	implementation(libs.androidx.lifecycle.runtime.compose)
-	ksp("com.google.dagger:hilt-android-compiler:2.48")
+	// Location
+	implementation(libs.play.services.location)
 
-	implementation("androidx.hilt:hilt-work:1.2.0")
-	ksp("androidx.hilt:hilt-compiler:1.2.0")
-	implementation("androidx.work:work-runtime-ktx:2.8.1")
-	implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-	implementation("androidx.compose.material:material-icons-extended:1.5.4")
-	implementation("androidx.compose.material:material:1.6.2")
-	implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
-	implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
+	// On-device inference: LiteRT runtime from Google Play services (not bundled in the APK)
+	implementation(libs.play.services.litert)
+	implementation(libs.kotlinx.coroutines.play.services)
 
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(platform(libs.androidx.compose.bom))
-
 	androidTestImplementation(libs.androidx.ui.test.junit4)
 	debugImplementation(libs.androidx.ui.tooling)
 	debugImplementation(libs.androidx.ui.test.manifest)
