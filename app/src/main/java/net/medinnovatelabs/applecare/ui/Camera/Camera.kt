@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -293,7 +294,10 @@ fun PhotoBottomSheetContent(
 	onDismiss: () -> Unit
 ) {
 	Column(
-		modifier = Modifier.fillMaxWidth(),
+		// The app is edge-to-edge: keep the Dismiss button above the system navigation bar.
+		modifier = Modifier
+			.fillMaxWidth()
+			.navigationBarsPadding(),
 		verticalArrangement = Arrangement.Center,
 		horizontalAlignment = Alignment.CenterHorizontally
 	) {

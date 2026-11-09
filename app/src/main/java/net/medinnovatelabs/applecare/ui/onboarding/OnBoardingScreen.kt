@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.foundation.Image
@@ -49,9 +50,11 @@ fun OnBoardingScreen(
 	val view = LocalView.current
 	val darkTheme = isSystemInDarkTheme()
 	if (!view.isInEditMode) {
-		DisposableEffect(darkTheme) {
-			val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
-			controller.isAppearanceLightStatusBars = !darkTheme
+		val controller = WindowCompat.getInsetsController((view.context as Activity).window, view)
+		// SideEffect (not DisposableEffect) so this runs *after* the theme's own SideEffect,
+		// which would otherwise reset the icons to light.
+		SideEffect { controller.isAppearanceLightStatusBars = !darkTheme }
+		DisposableEffect(Unit) {
 			onDispose { controller.isAppearanceLightStatusBars = darkTheme }
 		}
 	}
